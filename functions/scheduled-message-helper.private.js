@@ -1,11 +1,11 @@
 
-function getSendAtDate(additiveTime) {
-  const hours = parseInt(additiveTime.substring(0,2));
-  const minutes = parseInt(additiveTime.substring(2,4));
-  const currTime = new Date();
-  currTime.setHours(currTime.getHours() + hours);
-  currTime.setMinutes(currTime.getMinutes() + minutes);
-  return currTime;
+function getSendAtDate(subtractiveTime, appointmentTime) {
+  const hours = parseInt(subtractiveTime.substring(0,2));
+  const minutes = parseInt(subtractiveTime.substring(2,4));
+  const reminderDate = new Date(appointmentTime);
+  reminderDate.setHours(reminderDate.getHours() - hours);
+  reminderDate.setMinutes(reminderDate.getMinutes() - minutes);
+  return reminderDate;
 }
 
 function getReminderMessageBody(appointment) {
@@ -16,27 +16,54 @@ function getReminderMessageBody(appointment) {
   `
 }
 
+/**
+ * We check if the time is in the bounds of at a minimum an hour ahead
+ * or 7 days before; 1 hour <= Reminder Date <= 7 days
+ */
+function isValidReminderTime(appointmentDateString) {
+  const lowerTime = new Date();
+  const higherTime = new Date();
+  const currentDate = new Date(appointmentDateString);
+  lowerTime.setMinutes(lowerTime.getMinutes() + 61);
+  higherTime.setHours(higherTime.getHours() + 167);
+  higherTime.setMinutes(higherTime.getMinutes() + 59);
+  return lowerTime <= currentDate && currentDate <= higherTime;
+}
+
+function getAppointmentObject(apptString) {
+  const appointment = {};
+  const kv_array = apptString
+    .replace('{', '')
+    .replace('}', '')
+    .split(',');
+  kv_array.forEach(function (a) {
+    kv = a.split('=');
+    appointment[kv[0].trim()] = kv[1].trim();
+  });
+  return appointment;
+}
+
 function hasAllAppointmentProperties(appointment) {
   if (
     appointment.hasOwnProperty('event_type') && 
     appointment.hasOwnProperty('patient_id')&& 
     appointment.hasOwnProperty('appointment_id') && 
-    appointment.hasOwnProperty('appointmnet_datetime')
+    appointment.hasOwnProperty('appointment_datetime')
   ) {
     return true;
   }
   return false;
 }
 
+function getScheduledMessages(allMessages) {
+  return allMessages.filter(message => message.status === 'scheduled').slice(0, 2);
+}
+
 module.exports = {
   getSendAtDate,
   getReminderMessageBody,
-  hasAllAppointmentProperties
+  isValidReminderTime,
+  getAppointmentObject,
+  hasAllAppointmentProperties,
+  getScheduledMessages
 }
-
-//NOTES: Disregard
-    //console.log(await client.messages.list());
-    // await client.messages('SMed11ada6a3f74858a1121fec44f7956b').remove();
-    // await client.messages('SMed11ada6a3f74858a1121fec44f7956b')
-    //             .update({status: 'canceled'})
-    //             .then(message => console.log(message));

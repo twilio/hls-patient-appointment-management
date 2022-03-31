@@ -1,8 +1,9 @@
 /* eslint-disable camelcase */
-const THIS = 'save-booked:';
+const THIS = 'save-noshowed:';
 /*
  * --------------------------------------------------------------------------------
- * saves appointment booked event to s3
+ * For a no show we must remove all messages related to the patient's number
+ * We are purging all messages that were sent to the patient_phone
  *
  * event.appointment - flow.data that will be parenthesis enclosed comma-separated
  *                     key=value string. Note that values will not be enclosed in quotes.
@@ -11,26 +12,23 @@ const THIS = 'save-booked:';
  * returns
  * . code = 200, if successful
  *
- * . PUT in STATE   (disposition=QUEUED)
- * . PUT in HISTORY (disposition=QUEUED)
+ * . find appointment file in STATE
+ * . REPLACE in STATE   (disposition as is)
+ * . PUT     in HISTORY (disposition as is)
  * --------------------------------------------------------------------------------
  */
-const path = Runtime.getFunctions()['scheduled-message-helper'].path;
-const { getSendAtDate, hasAllAppointmentProperties } = require(path);
+const messageHelpersPath = Runtime.getFunctions()['scheduled-message-helper'].path;
+const generalHelpersPath = Runtime.getFunctions().helpers.path;
+const { hasAllAppointmentProperties, getAppointmentObject, getScheduledMessages } = require(messageHelpersPath);
+const { getParam, validateAppointment } = require(generalHelpersPath);
 
 exports.handler = async function (context, event, callback) {
   console.log(THIS, 'Begin');
   console.time(THIS);
-
-  const accountSid = context.ACCOUNT_SID;
-  const authToken = context.AUTH_TOKEN;
-  const client = require('twilio')(accountSid, authToken);
+  const client = context.getTwilioClient();
   const response = new Twilio.Response();
-
   try {
-    const { path } = Runtime.getFunctions().helpers;
-    const { getParam, setParam, validateAppointment } = require(path);
-
+    
     if (!event.hasOwnProperty('appointment')) {
       response.setBody({
         Error: "Missing appointment object in request body!"
@@ -40,16 +38,7 @@ exports.handler = async function (context, event, callback) {
     }
 
     // convert appointment string to json
-    const appointment = {};
-    const kv_array = event.appointment
-      .replace('{', '')
-      .replace('}', '')
-      .split(',');
-    kv_array.forEach(function (a) {
-      kv = a.split('=');
-      appointment[kv[0].trim()] = kv[1].trim();
-    });
- 
+    const appointment = getAppointmentObject(event.appointment);
     if (!hasAllAppointmentProperties(appointment)) {
       response.setBody({
         Error: "Missing attributes in the appointment object!"
@@ -58,29 +47,17 @@ exports.handler = async function (context, event, callback) {
       return callback(null, response);
     }
     validateAppointment(context, appointment);
-    appointment.event_type = 'BOOKED'; // over-ride
+    appointment.event_type = 'NOSHOWED'; // over-ride
 
-    // Now send out 2 scheduled messages
-    await client.messages
-      .create({
-        messagingServiceSid: context.MESSAGING_SERVICE_SID,
-        body: getReminderMessageBody(appointment),
-        sendAt: getSendAtDate(),
-        scheduleType: 'fixed',
-        to: appointment.patient_phone
-      })
-      .then(message => console.log(message.sid));
-
-    await client.messages
-      .create({
-          from: context.MESSAGING_SERVICE_SID,
-          body: getReminderMessageBody(appointment),
-          sendAt: getSendAtDate(),
-          scheduleType: 'fixed',
-          to: appointment.patient_phone
-        })
-      .then(message => console.log(message.sid));
-
+    // Remove all messages with the to number
+    const allMessages = await client.messages.list({to: appointment.patient_phone}).then(messages => messages);
+    for (const message of allMessages) {
+      if (message.status === 'scheduled') {
+        await client.messages(message.sid).update({status: 'canceled'}).then(m => console.log("Canceling and Removing message: ",m));
+      }
+      await client.messages(message.sid).remove();
+    }
+    
     response.setStatusCode(200);
     response.setBody({
       event_type: appointment.event_type

@@ -179,160 +179,6 @@ function readyToUse() {
 }
 
 // --------------------------------------------------------------------------------
-function checkAWSApplication() {
-  THIS = 'checkAWSApplication:';
-  console.log(THIS, 'running');
-  userActive = true;
-  fetch('/deployment/check-aws-application', {
-    method: 'POST',
-    headers: {
-      Accept: 'application/json',
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({ token }),
-  })
-    .then((response) => response.text())
-    .then((status) => {
-      console.log(THIS, status);
-      $('#aws-application-deploy .button').removeClass('loading');
-      $('.aws-application-loader').hide();
-      if (status === 'NOT-DEPLOYED') {
-        $('#aws-application-deploy').show();
-      } else if (status === 'DEPLOYING') {
-        $('#aws-application-deploying').show();
-        $('#aws-application-deploy').hide();
-        setTimeout(checkAWSApplication, 5000);
-      } else if (status === 'DEPLOYED') {
-        $('#aws-application-deployed').show();
-        $('#aws-application-deploying').hide();
-        $('#aws-application-open').attr(
-          'href',
-          `https://console.aws.amazon.com/cloudformation/`
-        );
-
-        readyToUse();
-      } else {
-        throw new Error();
-      }
-    })
-    .catch((err) => {
-      console.log(THIS, err);
-    });
-}
-
-// --------------------------------------------------------------------------------
-function deployAWSApplication(e) {
-  THIS = 'deployAWSApplication:';
-  console.log(THIS, 'running');
-  userActive = true;
-
-  e.preventDefault();
-  $('#aws-application-deploy .button').addClass('loading');
-  $('.aws-application-loader.button-loader').show();
-
-  fetch('/deployment/deploy-aws-code', {
-    method: 'POST',
-    headers: {
-      Accept: 'application/json',
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({ token }),
-  }).then(() => {
-    console.log(THIS, 'deployed aws code');
-  });
-
-  fetch('/deployment/deploy-aws-application', {
-    method: 'POST',
-    headers: {
-      Accept: 'application/json',
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({ token }),
-  })
-    .then(() => {
-      console.log(THIS, 'success');
-      checkAWSApplication();
-    })
-    .catch((err) => {
-      console.log(THIS, err);
-      $('#aws-application-deploy .button').removeClass('loading');
-      $('.aws-application-loader.button-loader').hide();
-    });
-}
-
-// --------------------------------------------------------------------------------
-function checkAWSBucket(resource) {
-  THIS = 'checkAWSBucket:';
-  console.log(THIS, 'running');
-  userActive = true;
-
-  fetch('/deployment/check-aws-bucket', {
-    method: 'POST',
-    headers: {
-      Accept: 'application/json',
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({ token }),
-  })
-    .then((response) => response.text())
-    .then((status) => {
-      console.log(THIS, status);
-      $('#aws-bucket-deploy .button').removeClass('loading');
-      $('.aws-bucket-loader').hide();
-      if (status === 'NOT-DEPLOYED') {
-        $('#aws-bucket-deploy').show();
-      } else if (status === 'DEPLOYING') {
-        $('#aws-bucket-deploying').show();
-        $('#aws-bucket-deploy').hide();
-        setTimeout(checkAWSBucket, 5000);
-      } else if (status === 'FAILED') {
-        throw new Error();
-      } else {
-        $('#aws-bucket-deployed').show();
-        $('#aws-bucket-deploying').hide();
-        $('#aws-bucket-open').attr(
-          'href',
-          `https://console.aws.amazon.com/s3/buckets/${status}`
-        );
-
-        checkAWSApplication();
-      }
-    })
-    .catch((err) => {
-      console.log(THIS, err);
-    });
-}
-
-// --------------------------------------------------------------------------------
-function deployAWSBucket(e) {
-  THIS = 'deployAWSBucket:';
-  console.log(THIS, 'running');
-  userActive = true;
-
-  e.preventDefault();
-  $('#aws-bucket-deploy .button').addClass('loading');
-  $('.aws-bucket-loader.button-loader').show();
-
-  fetch('/deployment/deploy-aws-bucket', {
-    method: 'POST',
-    headers: {
-      Accept: 'application/json',
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({ token }),
-  })
-    .then(() => {
-      console.log(THIS, 'success');
-      checkAWSBucket();
-    })
-    .catch((err) => {
-      console.log(THIS, err);
-      $('#aws-bucket-deploy .button').removeClass('loading');
-      $('.aws-bucket-loader.button-loader').hide();
-    });
-}
-
-// --------------------------------------------------------------------------------
 function checkStudioFlow() {
   THIS = 'checkStudioFlow:';
   console.log(THIS, 'running');
@@ -351,26 +197,26 @@ function checkStudioFlow() {
         if (response.status === 401) handleInvalidToken();
         throw Error(response.statusText);
       }
-      return response.text();
+      return response.json();
     })
-    .then((sid) => {
-      console.log(THIS, sid);
+    .then((resp) => {
+      console.log(THIS, resp);
       $('#flow-deploy .button').removeClass('loading');
       $('.flow-loader').hide();
-      if (sid === 'NOT-DEPLOYED') {
+      if (resp.data === 'NOT-DEPLOYED') {
         $('#flow-deploy').show();
       } else {
-        flowSid = sid;
+        flowsid = resp.data;
         $('#flow-deployed').show();
         $('#flow-deploy').hide();
         $('#flow-open').attr(
           'href',
-          `https://www.twilio.com/console/studio/flows/${sid}`
+          `https://www.twilio.com/console/studio/flows/${resp.data}`
         );
         $('#flow-rest-api-url').text(
-          `https://studio.twilio.com/v2/Flows/${sid}/Executions`
+          `https://studio.twilio.com/v2/Flows/${resp.data}/Executions`
         );
-        checkAWSBucket();
+        readyToUse();
       }
     })
     .catch((err) => {
@@ -726,13 +572,6 @@ function handleInvalidToken() {
   $('#flow-loader').hide();
   $('#flow-deploy').hide();
   $('#flow-deployed').hide();
-  $('#aws-bucket-deploy').hide();
-  $('#aws-bucket-deploying').hide();
-  $('#aws-bucket-deployed').hide();
-  $('#aws-application-deploy').hide();
-  $('#aws-application-deploying').hide();
-  $('#aws-application-deployed').hide();
-
   $('#password-input').focus();
 }
 // --------------------------------------------------------------------------------

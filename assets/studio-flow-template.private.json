@@ -11,6 +11,9 @@
         {
           "event": "incomingRequest",
           "next": "set_global_variables"
+        },
+        {
+          "event": "incomingParent"
         }
       ],
       "type": "trigger",
@@ -58,19 +61,23 @@
             {
               "type": "equal_to",
               "friendly_name": "Remind",
-              "arguments": ["{{flow.data.event_type}}"],
+              "arguments": [
+                "{{flow.data.event_type}}"
+              ],
               "value": "REMIND"
             }
           ],
           "event": "match",
-          "next": "save-remind"
+          "next": "message-remind"
         },
         {
           "conditions": [
             {
               "type": "equal_to",
               "friendly_name": "Opted-In",
-              "arguments": ["{{flow.data.event_type}}"],
+              "arguments": [
+                "{{flow.data.event_type}}"
+              ],
               "value": "OPTED-IN"
             }
           ],
@@ -82,7 +89,9 @@
             {
               "type": "equal_to",
               "friendly_name": "Optedout",
-              "arguments": ["{{flow.data.event_type}}"],
+              "arguments": [
+                "{{flow.data.event_type}}"
+              ],
               "value": "OPTED-OUT"
             }
           ],
@@ -94,72 +103,84 @@
             {
               "type": "equal_to",
               "friendly_name": "Booked",
-              "arguments": ["{{flow.data.event_type}}"],
+              "arguments": [
+                "{{flow.data.event_type}}"
+              ],
               "value": "BOOKED"
             }
           ],
           "event": "match",
-          "next": "save-booked"
+          "next": "message-booked"
         },
         {
           "conditions": [
             {
               "type": "equal_to",
               "friendly_name": "Canceled",
-              "arguments": ["{{flow.data.event_type}}"],
+              "arguments": [
+                "{{flow.data.event_type}}"
+              ],
               "value": "CANCELED"
             }
           ],
           "event": "match",
-          "next": "save-canceled"
+          "next": "message-canceled"
         },
         {
           "conditions": [
             {
               "type": "equal_to",
               "friendly_name": "Modified",
-              "arguments": ["{{flow.data.event_type}}"],
+              "arguments": [
+                "{{flow.data.event_type}}"
+              ],
               "value": "MODIFIED"
             }
           ],
           "event": "match",
-          "next": "save-modified"
+          "next": "message-modified"
         },
         {
           "conditions": [
             {
               "type": "equal_to",
               "friendly_name": "Noshowed",
-              "arguments": ["{{flow.data.event_type}}"],
+              "arguments": [
+                "{{flow.data.event_type}}"
+              ],
               "value": "NOSHOWED"
             }
           ],
           "event": "match",
-          "next": "save-noshowed"
+          "next": "message-noshowed"
         },
         {
           "conditions": [
             {
               "type": "equal_to",
               "friendly_name": "Confirmed",
-              "arguments": ["{{flow.data.event_type}}"],
+              "arguments": [
+                "{{flow.data.event_type}}"
+              ],
               "value": "CONFIRMED"
             }
           ],
           "event": "match",
-          "next": "save-confirmed"
+          "next": "send_confirmed"
         },
         {
           "conditions": [
             {
               "type": "equal_to",
               "friendly_name": "RESCHEDULED",
-              "arguments": ["{{flow.data.event_type}}"],
+              "arguments": [
+                "{{flow.data.event_type}}"
+              ],
               "value": "RESCHEDULED"
             }
           ],
           "event": "match",
-          "next": "save-rescheduled"
+          "next": "message-rescheduled"
         }
       ],
       "type": "split-based-on",
@@ -258,7 +279,7 @@
         "service": "{{trigger.message.InstanceSid}}",
         "to": "{{contact.channel.address}}",
         "offset": {
-          "y": 1030,
+          "y": 780,
           "x": 1850
         },
         "channel": "{{trigger.message.ChannelSid}}"
@@ -274,7 +295,9 @@
             {
               "type": "equal_to",
               "friendly_name": "Confirm",
-              "arguments": ["{{widgets.send_remind.inbound.Body}}"],
+              "arguments": [
+                "{{widgets.send_remind.inbound.Body}}"
+              ],
               "value": "CONFIRM APPT"
             }
           ],
@@ -286,7 +309,9 @@
             {
               "type": "equal_to",
               "friendly_name": "Cancel",
-              "arguments": ["{{widgets.send_remind.inbound.Body}}"],
+              "arguments": [
+                "{{widgets.send_remind.inbound.Body}}"
+              ],
               "value": "CANCEL APPT"
             }
           ],
@@ -369,8 +394,8 @@
         "service": "{{trigger.message.InstanceSid}}",
         "timeout": "120",
         "offset": {
-          "y": 1110,
-          "x": -150
+          "y": 1100,
+          "x": -170
         },
         "channel": "{{trigger.message.ChannelSid}}"
       }
@@ -386,7 +411,7 @@
         }
       ],
       "type": "run-function",
-      "name": "save-booked",
+      "name": "message-booked",
       "properties": {
         "parameters": [
           {
@@ -398,13 +423,13 @@
             "value": "{{flow.flow_sid}}"
           }
         ],
-        "url": "https://YOUR_TWILIO_ENVIRONMENT_DOMAIN_NAME/save-booked",
+        "url": "https://YOUR_TWILIO_ENVIRONMENT_DOMAIN_NAME/message-booked",
         "environment_sid": "YOUR_TWILIO_ENVIRONMENT_SID",
         "offset": {
           "y": 980,
           "x": 550
         },
-        "function_sid": "YOUR_FUNCTION_SID[save-booked]",
+        "function_sid": "YOUR_FUNCTION_SID[message-booked]",
         "service_sid": "YOUR_TWILIO_SERVICE_SID"
       }
     },
@@ -419,7 +444,7 @@
         }
       ],
       "type": "run-function",
-      "name": "save-canceled",
+      "name": "message-canceled",
       "properties": {
         "parameters": [
           {
@@ -431,13 +456,13 @@
             "value": "{{flow.flow_sid}}"
           }
         ],
-        "url": "https://YOUR_TWILIO_ENVIRONMENT_DOMAIN_NAME/save-canceled",
+        "url": "https://YOUR_TWILIO_ENVIRONMENT_DOMAIN_NAME/message-canceled",
         "environment_sid": "YOUR_TWILIO_ENVIRONMENT_SID",
         "offset": {
           "y": 930,
           "x": 870
         },
-        "function_sid": "YOUR_FUNCTION_SID[save-canceled]",
+        "function_sid": "YOUR_FUNCTION_SID[message-canceled]",
         "service_sid": "YOUR_TWILIO_SERVICE_SID"
       }
     },
@@ -452,7 +477,7 @@
         }
       ],
       "type": "run-function",
-      "name": "save-modified",
+      "name": "message-modified",
       "properties": {
         "parameters": [
           {
@@ -464,13 +489,13 @@
             "value": "{{flow.flow_sid}}"
           }
         ],
-        "url": "https://YOUR_TWILIO_ENVIRONMENT_DOMAIN_NAME/save-modified",
+        "url": "https://YOUR_TWILIO_ENVIRONMENT_DOMAIN_NAME/message-modified",
         "environment_sid": "YOUR_TWILIO_ENVIRONMENT_SID",
         "offset": {
           "y": 880,
           "x": 1190
         },
-        "function_sid": "YOUR_FUNCTION_SID[save-modified]",
+        "function_sid": "YOUR_FUNCTION_SID[message-modified]",
         "service_sid": "YOUR_TWILIO_SERVICE_SID"
       }
     },
@@ -485,7 +510,7 @@
         }
       ],
       "type": "run-function",
-      "name": "save-noshowed",
+      "name": "message-noshowed",
       "properties": {
         "parameters": [
           {
@@ -497,46 +522,13 @@
             "value": "{{flow.flow_sid}}"
           }
         ],
-        "url": "https://YOUR_TWILIO_ENVIRONMENT_DOMAIN_NAME/save-noshowed",
+        "url": "https://YOUR_TWILIO_ENVIRONMENT_DOMAIN_NAME/message-noshowed",
         "environment_sid": "YOUR_TWILIO_ENVIRONMENT_SID",
         "offset": {
           "y": 820,
           "x": 1520
         },
-        "function_sid": "YOUR_FUNCTION_SID[save-noshowed]",
-        "service_sid": "YOUR_TWILIO_SERVICE_SID"
-      }
-    },
-    {
-      "transitions": [
-        {
-          "event": "success",
-          "next": "send_confirmed"
-        },
-        {
-          "event": "fail"
-        }
-      ],
-      "type": "run-function",
-      "name": "save-confirmed",
-      "properties": {
-        "parameters": [
-          {
-            "key": "appointment",
-            "value": "{{flow.data}}"
-          },
-          {
-            "key": "flow_sid",
-            "value": "{{flow.flow_sid}}"
-          }
-        ],
-        "url": "https://YOUR_TWILIO_ENVIRONMENT_DOMAIN_NAME/save-confirmed",
-        "environment_sid": "YOUR_TWILIO_ENVIRONMENT_SID",
-        "offset": {
-          "y": 780,
-          "x": 1840
-        },
-        "function_sid": "YOUR_FUNCTION_SID[save-confirmed]",
+        "function_sid": "YOUR_FUNCTION_SID[message-noshowed]",
         "service_sid": "YOUR_TWILIO_SERVICE_SID"
       }
     },
@@ -551,7 +543,7 @@
         }
       ],
       "type": "run-function",
-      "name": "save-rescheduled",
+      "name": "message-rescheduled",
       "properties": {
         "parameters": [
           {
@@ -563,13 +555,13 @@
             "value": "{{flow.flow_sid}}"
           }
         ],
-        "url": "https://YOUR_TWILIO_ENVIRONMENT_DOMAIN_NAME/save-rescheduled",
+        "url": "https://YOUR_TWILIO_ENVIRONMENT_DOMAIN_NAME/message-rescheduled",
         "environment_sid": "YOUR_TWILIO_ENVIRONMENT_SID",
         "offset": {
           "y": 730,
           "x": 2170
         },
-        "function_sid": "YOUR_FUNCTION_SID[save-rescheduled]",
+        "function_sid": "YOUR_FUNCTION_SID[message-confirmed]",
         "service_sid": "YOUR_TWILIO_SERVICE_SID"
       }
     },
@@ -607,7 +599,7 @@
         }
       ],
       "type": "run-function",
-      "name": "save-remind",
+      "name": "message-remind",
       "properties": {
         "parameters": [
           {
@@ -619,13 +611,13 @@
             "value": "{{flow.flow_sid}}"
           }
         ],
-        "url": "https://YOUR_TWILIO_ENVIRONMENT_DOMAIN_NAME/save-remind",
+        "url": "https://YOUR_TWILIO_ENVIRONMENT_DOMAIN_NAME/message-remind",
         "environment_sid": "YOUR_TWILIO_ENVIRONMENT_SID",
         "offset": {
           "y": 770,
           "x": -140
         },
-        "function_sid": "YOUR_FUNCTION_SID[save-remind]",
+        "function_sid": "YOUR_FUNCTION_SID[message-remind]",
         "service_sid": "YOUR_TWILIO_SERVICE_SID"
       }
     },
@@ -712,7 +704,9 @@
             {
               "type": "equal_to",
               "friendly_name": "Cancel",
-              "arguments": ["{{widgets.send_booked.inbound.Body}}"],
+              "arguments": [
+                "{{widgets.send_booked.inbound.Body}}"
+              ],
               "value": "CANCEL APPT"
             }
           ],

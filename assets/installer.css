@@ -164,7 +164,7 @@ span.checkmark {
   border-radius: 50%;
   width: 30px;
   height: 30px;
-  animation: spin 1s linear infinite;
+  animation: spin 2s linear infinite;
   display: inline-block;
   vertical-align: middle;
   margin-left: 5px;

@@ -21,7 +21,7 @@
               </td>
               <td class="configuration-value">
                   <div class="configure-input">
-                      <input  id="account_name" type="text" name="account_name" placeholder="Twilio Account" readonly>
+                      <input id="account_name" type="text" name="account_name" placeholder="Twilio Account" readonly>
                   </div>
               </td>
           </table>
@@ -49,79 +49,33 @@
           </table>
       </div>
 
-      <div class="form-group application-password">
+      <div id="input-error" style="color: red;display: none"></div>
+      <!--- To clone ---->
+      <div class="form-group clone-original" style="display: none">
         <table class="configuration">
             <td class="configuration-label">
-                <div class="configure-error-twilio-phone-number configure-label-long">
-                    <div class="configure-label-long">You do not have any Twilio phone numbers.</div>
-                    <div class="configure-label-long">Click button below to get a number, then refresh this page.</div>
-                    <button class="button get-twilio-phone">Get Twilio Phone Number</button>
-                </div>
                 <div class="ht info-circle">i
-                    <span class="tooltip">Twilio phone number to send SMS from. Your patient will see this number.</span>
+                    <span class="tooltip">This is the tooltip.</span>
                 </div>
-                <div class="configure-label"> Application Password <span class="star">*</span></div>
+                <div class="configure-label">Field Label</div> <span class="star">* </span>
+                <div class="configure-error"></div>
             </td>
             <td class="configuration-value">
                 <div class="configure-input">
-                  <input id="app-password" type="text" name="app-password">
-                </div>
-            </td>
-        </table>
-     </div>
-
-      <div class="form-group customer-name">
-        <table class="configuration">
-            <td class="configuration-label">
-                <div class="configure-error-twilio-phone-number configure-label-long">
-                    <div class="configure-label-long">You do not have any Twilio phone numbers.</div>
-                    <div class="configure-label-long">Click button below to get a number, then refresh this page.</div>
-                    <button class="button get-twilio-phone">Get Twilio Phone Number</button>
-                </div>
-                <div class="ht info-circle">i
-                    <span class="tooltip">Customer Name</span>
-                </div>
-                <div class="configure-label"> Customer Name <span class="star">*</span></div>
-            </td>
-            <td class="configuration-value">
-                <div class="configure-input">
-                  <input id="customer-name" type="text" name="customer-name">
+                    <input id="field-name" type="text" name="field-name">
                 </div>
             </td>
         </table>
       </div>
-
-      <div class="form-group administrator-name">
-        <table class="configuration">
-            <td class="configuration-label">
-                <div class="configure-error-twilio-phone-number configure-label-long">
-                    <div class="configure-label-long">You do not have any Twilio phone numbers.</div>
-                    <div class="configure-label-long">Click button below to get a number, then refresh this page.</div>
-                    <button class="button get-twilio-phone">Get Twilio Phone Number</button>
-                </div>
-                <div class="ht info-circle">i
-                    <span class="tooltip">Phone to be sent texts to</span>
-                </div>
-                <div class="configure-label"> Administrator Phone <span class="star">*</span></div>
-            </td>
-            <td class="configuration-value">
-                <div class="configure-input">
-                  <input id="admin-phone" type="text" name="admin-phone">
-                </div>
-            </td>
-        </table>
-      </div>
-
-
+      <!----End of clone  ---->
       <br/>
       <h4><strong>Step 3: </strong>Deploy your application and try it out!</h4>
 
       <div class="form-section">
           <div class="form-group">
-              <div id="service-loader"></div>
               <div id="service-deploy" style="display: none;" class="deployer">
                   <a class="button" id="service-deploy-button" onclick="deployApplication(event);">Deploy Telehealth Application</a>
-                  <div id="service-loader" style="display: none;"></div>
+                  <div class="service-loader"></div>
               </div>
               <div id="service-deploying" style="display: none;" class="deployer">
                   <h4>Telehealth application is being deployed.</h4>
@@ -130,8 +84,11 @@
               <div id="service-deployed" style="display: none;" class="deployer">
                 <h4><span class="checkmark">&#10003;</span> Telehealth application is deployed</h4>
                 <br>
-                <a id="application-open" class="button button-outline" href="" target="_blank">Open Application</a>
-                <a id="service-open" class="button button-outline" href="" target="_blank">Open Service</a>
+                <div class="deployed-buttons">
+                    <button class="button button-outline"><a id="application-open"  href="" target="_blank">Open Application</a></button>
+                    <button class="button button-outline" onclick="deployApplication(event)" >Re-deploy Application</button>
+                    <button class="button button-outline"><a id="service-open"  href="" target="_blank">Open Service</a></button>
+                </div>
               </div>
           </div>
       </div>

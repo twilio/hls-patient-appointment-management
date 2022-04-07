@@ -17,14 +17,15 @@
  * }
  * --------------------------------------------------------------------------------
  */
-const assert = require('assert');
 const { getParam, assertLocalhost } = require(Runtime.getFunctions()['helpers'].path);
 
 exports.handler = async function (context, event, callback) {
   const THIS = 'check-application';
-
   console.time(THIS);
   assertLocalhost(context);
+
+  const response = new Twilio.Response();
+  response.setStatusCode(200);
   try {
 
     const application_name   = await getParam(context, 'APPLICATION_NAME');
@@ -37,8 +38,8 @@ exports.handler = async function (context, event, callback) {
     console.log(THIS, `SERVICE_SID for APPLICATION_NAME (${application_name}): ${service_sid}) at ${application_url}`);
 
     const response = {
-      deploy_state   : service_sid ? 'DEPLOYED' : 'NOT-DEPLOYED',
-      service_sid    : service_sid ? service_sid : '',
+      deploy_state: service_sid ? 'DEPLOYED' : 'NOT-DEPLOYED',
+      service_sid: service_sid ? service_sid : '',
       application_url: service_sid ? application_url : '',
     }
     return callback(null, response);

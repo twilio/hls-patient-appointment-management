@@ -23,400 +23,535 @@ delete baseUrl.hash;
 delete baseUrl.search;
 const fullUrl = baseUrl.href.substr(0, baseUrl.href.length - 1);
 
-/*
- *fetch(`${fullUrl}/return-config`)
- *  .then((response) => response.json())
- *  .then((json) => {
- *    phoneNumber = json.phone_number;
- *    // Grab the phone number being used and display it to help the user test their app
- *    const phoneNumberElements = $('.phone-number');
- *    phoneNumberElements.html(phoneNumber);
- *  });
- */
+ window.addEventListener('load', async () => {
+  if (localStorage.getItem('mfaToken')) {
+    console.log("hello");
+    $('#password-form').hide();
+    $('#mfa-form').hide();
+    $('#ready-to-use').show();
+  }
 
-const timer = (ms) => new Promise((res) => setTimeout(res, ms));
+  const timer = (ms) => new Promise((res) => setTimeout(res, ms));
 
-// --------------------------------------------------------------------------------
-function checkHistory() {
-  THIS = 'checkHistory:';
-  userActive = true;
-  console.log(THIS, 'running');
-  fetch(`/deployment/check-query?table=history`, {
-    method: 'POST',
-    headers: {
-      Accept: 'application/json',
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({ token: token }),
-  })
-    .then((response) => response.text())
-    .then((url) => {
-      console.log(THIS, url);
-      $('#history-download .button').removeClass('loading');
-      $('.history-downloader').hide();
-      if (url === 'READY') {
-        $('#history-query').show();
-      } else if (url === 'RUNNING') {
-        $('#history-querying').show();
-        $('#history-query').hide();
-        setTimeout(checkHistory, 5000);
-      } else if (url === 'FAILED') {
-        throw new Error();
-      } else {
-        $('#history-ready').show();
-        $('#history-querying').hide();
-        $('#history-download').attr('href', `${url}`);
-      }
+  // --------------------------------------------------------------------------------
+  function checkHistory() {
+    THIS = 'checkHistory:';
+    userActive = true;
+    console.log(THIS, 'running');
+    fetch(`/deployment/check-query?table=history`, {
+      method: 'POST',
+      headers: {
+        Accept: 'application/json',
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ token: token }),
     })
-    .catch((err) => {
-      console.log(THIS, err);
-    });
-}
-
-// --------------------------------------------------------------------------------
-function downloadHistory(e) {
-  THIS = 'downloadHistory:';
-  console.log(THIS, 'running');
-  userActive = true;
-  e.preventDefault();
-  $('#history-download .button').addClass('loading');
-  $('.history-downloader.button-loader').show();
-
-  fetch('/deployment/execute-query?table=history', {
-    method: 'POST',
-    headers: {
-      Accept: 'application/json',
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({ token }),
-  })
-    .then(() => {
-      console.log(THIS, 'success');
-      checkHistory();
-    })
-    .catch((err) => {
-      console.log(THIS, err);
-      $('#history-download .button').removeClass('loading');
-      $('.history-downloader.button-loader').hide();
-    });
-}
-
-// --------------------------------------------------------------------------------
-function checkState() {
-  THIS = 'checkState:';
-  console.log(THIS, 'running');
-  userActive = true;
-
-  fetch(`/deployment/check-query?table=state`, {
-    method: 'POST',
-    headers: {
-      Accept: 'application/json',
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({ token: token }),
-  })
-    .then((response) => response.text())
-    .then((url) => {
-      console.log(THIS, url);
-      $('#state-download .button').removeClass('loading');
-      $('.state-downloader').hide();
-      if (url === 'READY') {
-        $('#state-query').show();
-      } else if (url === 'RUNNING') {
-        $('#state-querying').show();
-        $('#state-query').hide();
-        setTimeout(checkState, 5000);
-      } else if (url === 'FAILED') {
-        throw new Error();
-      } else {
-        $('#state-ready').show();
-        $('#state-querying').hide();
-        $('#state-download').attr('href', `${url}`);
-      }
-    })
-    .catch((err) => {
-      console.log(THIS, err);
-    });
-}
-
-// --------------------------------------------------------------------------------
-function downloadState(e) {
-  THIS = 'downloadState:';
-  console.log(THIS, 'running');
-  userActive = true;
-
-  e.preventDefault();
-  $('#state-download .button').addClass('loading');
-  $('.state-downloader.button-loader').show();
-
-  fetch('/deployment/execute-query?table=state', {
-    method: 'POST',
-    headers: {
-      Accept: 'application/json',
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({ token }),
-  })
-    .then(() => {
-      console.log(THIS, 'success');
-      checkState();
-    })
-    .catch((err) => {
-      console.log(THIS, err);
-      $('#state-download .button').removeClass('loading');
-      $('.state-downloader.button-loader').hide();
-    });
-}
-
-// --------------------------------------------------------------------------------
-function readyToUse() {
-  THIS = 'readyToUse:';
-  console.log(THIS, 'running');
-  $('#ready-to-use').show();
-
-  checkState();
-  checkHistory();
-}
-
-// --------------------------------------------------------------------------------
-function checkStudioFlow() {
-  THIS = 'checkStudioFlow:';
-  console.log(THIS, 'running');
-  userActive = true;
-
-  fetch('/deployment/check-studio-flow', {
-    method: 'POST',
-    headers: {
-      Accept: 'application/json',
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({ token }),
-  })
-    .then((response) => {
-      if (!response.ok) {
-        if (response.status === 401) handleInvalidToken();
-        throw Error(response.statusText);
-      }
-      return response.json();
-    })
-    .then((resp) => {
-      console.log(THIS, resp);
-      $('#flow-deploy .button').removeClass('loading');
-      $('.flow-loader').hide();
-      if (resp.data === 'NOT-DEPLOYED') {
-        $('#flow-deploy').show();
-      } else {
-        flowsid = resp.data;
-        $('#flow-deployed').show();
-        $('#flow-deploy').hide();
-        $('#flow-open').attr(
-          'href',
-          `https://www.twilio.com/console/studio/flows/${resp.data}`
-        );
-        $('#flow-rest-api-url').text(
-          `https://studio.twilio.com/v2/Flows/${resp.data}/Executions`
-        );
-        readyToUse();
-      }
-    })
-    .catch((err) => {
-      console.log(THIS, err);
-    });
-}
-
-// --------------------------------------------------------------------------------
-function deployStudioFlow() {
-  THIS = 'deployStudioFlow:';
-  console.log(THIS, 'running');
-
-  fetch('/deployment/deploy-studio-flow', {
-    method: 'POST',
-    headers: {
-      Accept: 'application/json',
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({ token }),
-  })
-    .then((response) => {
-      if (!response.ok) {
-        if (response.status === 401) handleInvalidToken();
-        throw Error(response.statusText);
-      }
-      return response.text();
-    })
-    .then(() => {
-      console.log(THIS, 'success');
-      checkStudioFlow();
-    })
-    .catch((err) => {
-      console.log(THIS, err);
-    });
-}
-
-// --------------------------------------------------------------------------------
-function check() {
-  THIS = 'check:';
-  console.log(THIS, 'running');
-  userActive = true;
-
-  fetch('/deployment/check', {
-    method: 'POST',
-    headers: {
-      Accept: 'application/json',
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({ token: token }),
-  })
-    .then((response) => {
-      if (!response.ok) if (response.status === 401) handleInvalidToken();
-      return response.text();
-    })
-    .then((text) => {
-      errors = JSON.parse(text);
-      if (errors.length === 0) {
-        // no errors, so proceed
-        $('#valid-environment-variable').show();
-        checkStudioFlow();
-      } else {
-        $('#invalid-environment-variable').show();
-        for (e of errors) {
-          const error = $('<p></p>').text(JSON.stringify(e));
-          $('#invalid-environment-variable').append(error);
+      .then((response) => response.text())
+      .then((url) => {
+        console.log(THIS, url);
+        $('#history-download .button').removeClass('loading');
+        $('.history-downloader').hide();
+        if (url === 'READY') {
+          $('#history-query').show();
+        } else if (url === 'RUNNING') {
+          $('#history-querying').show();
+          $('#history-query').hide();
+          setTimeout(checkHistory, 5000);
+        } else if (url === 'FAILED') {
+          throw new Error();
+        } else {
+          $('#history-ready').show();
+          $('#history-querying').hide();
+          $('#history-download').attr('href', `${url}`);
         }
-      }
+      })
+      .catch((err) => {
+        console.log(THIS, err);
+      });
+  }
+
+  // --------------------------------------------------------------------------------
+  function downloadHistory(e) {
+    THIS = 'downloadHistory:';
+    console.log(THIS, 'running');
+    userActive = true;
+    e.preventDefault();
+    $('#history-download .button').addClass('loading');
+    $('.history-downloader.button-loader').show();
+
+    fetch('/deployment/execute-query?table=history', {
+      method: 'POST',
+      headers: {
+        Accept: 'application/json',
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ token }),
     })
-    .catch((err) => {
-      console.log(THIS, err);
-    });
-}
+      .then(() => {
+        console.log(THIS, 'success');
+        checkHistory();
+      })
+      .catch((err) => {
+        console.log(THIS, err);
+        $('#history-download .button').removeClass('loading');
+        $('.history-downloader.button-loader').hide();
+      });
+  }
 
-// --------------------------------------------------------------------------------
-async function login(e) {
-  e.preventDefault();
-  userActive = true;
+  // --------------------------------------------------------------------------------
+  function checkState() {
+    THIS = 'checkState:';
+    console.log(THIS, 'running');
+    userActive = true;
 
-  const passwordInput = $('#password-input').val();
-  fetch('/login', {
-    method: 'POST',
-    headers: {
-      Accept: 'application/json',
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({ password: passwordInput }),
-  })
-    .then((response) => {
-      if (!response.ok) {
-        $('#login-error').text(
-          response.status === 401
-            ? 'Incorrect password, please try again.'
-            : 'There was an error when attempting to log in.'
-        );
-        throw Error(response.statusText);
-      }
-
-      return response;
+    fetch(`/deployment/check-query?table=state`, {
+      method: 'POST',
+      headers: {
+        Accept: 'application/json',
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ token: token }),
     })
-    .then((response) => response.json())
-    .then((r) => {
-      token = r.token;
-      $('#password-form').hide();
-      $('#password-input').val('');
-      var decodedToken = parseJwt(token);
-      if (decodedToken['aud'] === 'app') {
+      .then((response) => response.text())
+      .then((url) => {
+        console.log(THIS, url);
+        $('#state-download .button').removeClass('loading');
+        $('.state-downloader').hide();
+        if (url === 'READY') {
+          $('#state-query').show();
+        } else if (url === 'RUNNING') {
+          $('#state-querying').show();
+          $('#state-query').hide();
+          setTimeout(checkState, 5000);
+        } else if (url === 'FAILED') {
+          throw new Error();
+        } else {
+          $('#state-ready').show();
+          $('#state-querying').hide();
+          $('#state-download').attr('href', `${url}`);
+        }
+      })
+      .catch((err) => {
+        console.log(THIS, err);
+      });
+  }
+
+  // --------------------------------------------------------------------------------
+  function downloadState(e) {
+    THIS = 'downloadState:';
+    console.log(THIS, 'running');
+    userActive = true;
+
+    e.preventDefault();
+    $('#state-download .button').addClass('loading');
+    $('.state-downloader.button-loader').show();
+
+    fetch('/deployment/execute-query?table=state', {
+      method: 'POST',
+      headers: {
+        Accept: 'application/json',
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ token }),
+    })
+      .then(() => {
+        console.log(THIS, 'success');
+        checkState();
+      })
+      .catch((err) => {
+        console.log(THIS, err);
+        $('#state-download .button').removeClass('loading');
+        $('.state-downloader.button-loader').hide();
+      });
+  }
+
+  // --------------------------------------------------------------------------------
+  function readyToUse() {
+    THIS = 'readyToUse:';
+    console.log(THIS, 'running');
+    $('#ready-to-use').show();
+
+    checkState();
+    checkHistory();
+  }
+
+  // --------------------------------------------------------------------------------
+  function checkStudioFlow() {
+    THIS = 'checkStudioFlow:';
+    console.log(THIS, 'running');
+    userActive = true;
+
+    fetch('/deployment/check-studio-flow', {
+      method: 'POST',
+      headers: {
+        Accept: 'application/json',
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ token }),
+    })
+      .then((response) => {
+        if (!response.ok) {
+          if (response.status === 401) handleInvalidToken();
+          throw Error(response.statusText);
+        }
+        return response.json();
+      })
+      .then((resp) => {
+        console.log(THIS, resp);
+        $('#flow-deploy .button').removeClass('loading');
+        $('.flow-loader').hide();
+        if (resp.data === 'NOT-DEPLOYED') {
+          $('#flow-deploy').show();
+        } else {
+          flowsid = resp.data;
+          $('#flow-deployed').show();
+          $('#flow-deploy').hide();
+          $('#flow-open').attr(
+            'href',
+            `https://www.twilio.com/console/studio/flows/${resp.data}`
+          );
+          $('#flow-rest-api-url').text(
+            `https://studio.twilio.com/v2/Flows/${resp.data}/Executions`
+          );
+          readyToUse();
+        }
+      })
+      .catch((err) => {
+        console.log(THIS, err);
+      });
+  }
+
+  // --------------------------------------------------------------------------------
+  function deployStudioFlow() {
+    THIS = 'deployStudioFlow:';
+    console.log(THIS, 'running');
+
+    fetch('/deployment/deploy-studio-flow', {
+      method: 'POST',
+      headers: {
+        Accept: 'application/json',
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ token }),
+    })
+      .then((response) => {
+        if (!response.ok) {
+          if (response.status === 401) handleInvalidToken();
+          throw Error(response.statusText);
+        }
+        return response.text();
+      })
+      .then(() => {
+        console.log(THIS, 'success');
+        checkStudioFlow();
+      })
+      .catch((err) => {
+        console.log(THIS, err);
+      });
+  }
+
+  // --------------------------------------------------------------------------------
+  function check() {
+    THIS = 'check:';
+    console.log(THIS, 'running');
+    userActive = true;
+
+    fetch('/deployment/check', {
+      method: 'POST',
+      headers: {
+        Accept: 'application/json',
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ token: token }),
+    })
+      .then((response) => {
+        if (!response.ok) if (response.status === 401) handleInvalidToken();
+        return response.text();
+      })
+      .then((text) => {
+        errors = JSON.parse(text);
+        if (errors.length === 0) {
+          // no errors, so proceed
+          $('#valid-environment-variable').show();
+          checkStudioFlow();
+        } else {
+          $('#invalid-environment-variable').show();
+          for (e of errors) {
+            const error = $('<p></p>').text(JSON.stringify(e));
+            $('#invalid-environment-variable').append(error);
+          }
+        }
+      })
+      .catch((err) => {
+        console.log(THIS, err);
+      });
+  }
+
+  // --------------------------------------------------------------------------------
+  async function login(e) {
+    e.preventDefault();
+    userActive = true;
+
+    const passwordInput = $('#password-input').val();
+    fetch('/login', {
+      method: 'POST',
+      headers: {
+        Accept: 'application/json',
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ password: passwordInput }),
+    })
+      .then((response) => {
+        if (!response.ok) {
+          $('#login-error').text(
+            response.status === 401
+              ? 'Incorrect password, please try again.'
+              : 'There was an error when attempting to log in.'
+          );
+          throw Error(response.statusText);
+        }
+
+        return response;
+      })
+      .then((response) => response.json())
+      .then((r) => {
+        token = r.token;
+        $('#password-form').hide();
+        $('#password-input').val('');
+        var decodedToken = parseJwt(token);
+        if (decodedToken['aud'] === 'app') {
+          $('#auth-successful').show();
+          scheduleTokenRefresh();
+          check();
+        } else {
+          $('#mfa-form').show();
+          $('#mfa-input').focus();
+        }
+      })
+      .catch((err) => console.log(err));
+  }
+
+  // --------------------------------------------------------------------------------
+
+  function parseJwt(token) {
+    var base64Url = token.split('.')[1];
+    var base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+    var jsonPayload = decodeURIComponent(
+      atob(base64)
+        .split('')
+        .map(function (c) {
+          return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+        })
+        .join('')
+    );
+
+    return JSON.parse(jsonPayload);
+  }
+
+  // -------------------------------------------------------------------------------
+  async function mfa(e) {
+    e.preventDefault();
+    userActive = true;
+
+    const mfaInput = $('#mfa-input').val();
+    await fetch('/mfa', {
+      method: 'POST',
+      headers: {
+        Accept: 'application/json',
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ mfaCode: mfaInput, token: token }),
+    })
+      .then((response) => {
+        if (!response.ok) {
+          $('#mfa-error').text(
+            response.status === 401
+              ? response.headers.get('Error-Message')
+              : 'There was an error in verifying your security code.'
+          );
+          throw Error(response.statusText);
+        }
+
+        return response;
+      })
+      .then((response) => response.json())
+      .then((r) => {
+        token = r.token;
+        localStorage.setItem('mfaToken', token);
+        $('#mfa-form').hide();
+        $('#mfa-input').val('');
         $('#auth-successful').show();
         scheduleTokenRefresh();
-        check();
-      } else {
-        $('#mfa-form').show();
-        $('#mfa-input').focus();
-      }
-    })
-    .catch((err) => console.log(err));
-}
-
-// --------------------------------------------------------------------------------
-
-function parseJwt(token) {
-  var base64Url = token.split('.')[1];
-  var base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
-  var jsonPayload = decodeURIComponent(
-    atob(base64)
-      .split('')
-      .map(function (c) {
-        return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
       })
-      .join('')
-  );
+      .catch((err) => console.log(err));
+  }
+  function scheduleTokenRefresh() {
+    setTimeout(refreshToken, TOKEN_REFRESH_INTERVAL);
+  }
+  // -----------------------------------------------------------------------------
+  async function refreshToken() {
+    if (!userActive) return;
+    userActive = false;
 
-  return JSON.parse(jsonPayload);
+    fetch('/refresh-token', {
+      method: 'POST',
+      headers: {
+        Accept: 'application/json',
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ token: token }),
+    })
+      .then((response) => {
+        return response;
+      })
+      .then((response) => response.json())
+      .then((r) => {
+        scheduleTokenRefresh();
+        token = r.token;
+      })
+      .catch((err) => console.log(err));
+  }
+  // --------------------------------------------------------------------------------
+  async function bookAppointment(e) {
+    e.preventDefault();
+    THIS = 'bookAppointment:';
+    userActive = true;
+
+    simResponse = $('.simulate-response');
+
+    $('#book_appointment_btn').addClass('loading');
+    simResponse.text('Please wait...').show();
+
+    const patientName = $('#patient-name').val();
+    const phoneNumber = $('#patient-phone-number').val();
+
+    if (patientName === '' || phoneNumber === '') {
+      showSimReponseError('Patient name and phone number must be filled');
+      return;
+    }
+
+    fetch('/deployment/simulation-event', {
+      method: 'POST',
+      headers: {
+        Accept: 'application/json',
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        token: token,
+        command: 'BOOKED',
+        firstName: patientName,
+        phoneNumber: phoneNumber,
+      }),
+    })
+      .then(() => {
+        simRemindTimeout = 120; // seconds
+        setTimeout(updateSimRemindTimeout, 1000);
+        showSimReponseSuccess();
+      })
+      .catch(() => {
+        showSimReponseError('Unable to send your appointment request.');
+      })
+      .finally(() => {
+        $('#book_appointment_btn').removeClass('loading');
+      });
+  }
+  // ------------------------------------------------------------------------------
+  function updateSimRemindTimeout() {
+    simRemindTimeout -= 1;
+    showSimReponseSuccess();
+    if (simRemindTimeout < 1) {
+      simResponse.fadeOut().removeClass('success');
+      $('#remind_appointment_btn').show();
+    } else {
+      setTimeout(updateSimRemindTimeout, 1000);
+    }
+  }
+
+  // --------------------------------------------------------------------------------
+  async function remindAppointment(e) {
+    e.preventDefault();
+    THIS = 'remindAppointment:';
+    userActive = true;
+
+    simResponse = $('.simulate-response');
+
+    $('#remind_appointment_btn').addClass('loading');
+    simResponse.text('Please wait...').show();
+
+    fetch('/deployment/simulation-event', {
+      method: 'POST',
+      headers: {
+        Accept: 'application/json',
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        token: token,
+        command: 'REMIND',
+      }),
+    })
+      .then((response) => response.json())
+      .then((r) => {
+        showSimReminderSuccess();
+      })
+      .catch(() => {
+        showSimReponseError('Unable to send your appointment reminder request.');
+      })
+      .finally(() => {
+        $('#remind_appointment_btn').removeClass('loading');
+      });
+  }
+
+  // --------------------------------------------------------------------------
+  function showSimReponseError(message) {
+    simResponse.text(message).addClass('failure');
+    setTimeout(() => simResponse.fadeOut().removeClass('failure'), 4000);
+  }
+  function showSimReponseSuccess() {
+    simResponse
+      .text(
+        `Your appointment request has been sent. Please wait ${simRemindTimeout} seconds to simulate a reminder.`
+      )
+      .addClass('success');
+    // setTimeout(() => simResponse.fadeOut().removeClass('success'), 4000);
+  }
+  function showSimReminderSuccess() {
+    simResponse.text(`Your reminder request has been sent.`).addClass('success');
+    setTimeout(() => simResponse.fadeOut().removeClass('success'), 4000);
+  }
+  // $('#auth-successful').hide();
+  // $('#mfa-form').hide();
+  $('#simulate-section').hide();
+  // $('#password-form').show();
+  // $('#password-input').focus();
+  // $('#remind_appointment_btn').hide();
+});
+
+function goSimulate() {
+  $('main').hide();
+  $('#simulation-text').hide();
+  $('#simulate-section').show();
+  getSimulationParameters();
 }
 
-// -------------------------------------------------------------------------------
-async function mfa(e) {
-  e.preventDefault();
-  userActive = true;
-
-  const mfaInput = $('#mfa-input').val();
-  fetch('/mfa', {
-    method: 'POST',
-    headers: {
-      Accept: 'application/json',
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({ mfaCode: mfaInput, token: token }),
-  })
-    .then((response) => {
-      if (!response.ok) {
-        $('#mfa-error').text(
-          response.status === 401
-            ? response.headers.get('Error-Message')
-            : 'There was an error in verifying your security code.'
-        );
-        throw Error(response.statusText);
-      }
-
-      return response;
-    })
-    .then((response) => response.json())
-    .then((r) => {
-      token = r.token;
-
-      $('#mfa-form').hide();
-      $('#mfa-input').val('');
-      $('#auth-successful').show();
-      scheduleTokenRefresh();
-      check();
-    })
-    .catch((err) => console.log(err));
-}
-function scheduleTokenRefresh() {
-  setTimeout(refreshToken, TOKEN_REFRESH_INTERVAL);
-}
-// -----------------------------------------------------------------------------
-async function refreshToken() {
-  if (!userActive) return;
-  userActive = false;
-
-  fetch('/refresh-token', {
-    method: 'POST',
-    headers: {
-      Accept: 'application/json',
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({ token: token }),
-  })
-    .then((response) => {
-      return response;
-    })
-    .then((response) => response.json())
-    .then((r) => {
-      scheduleTokenRefresh();
-      token = r.token;
-    })
-    .catch((err) => console.log(err));
+function goHome() {
+  $('main').show();
+  $('#simulation-text').show();
+  $('#simulate-section').hide();
 }
 
-// -----------------------------------------------------------------------------
+
+function handleInvalidToken() {
+  $('#password-form').show();
+  $('#auth-successful').hide();
+  $('#mfa-form').hide();
+  $('#invalid-environment-variable').hide();
+  $('#valid-environment-variable').hide();
+  $('#flow-loader').hide();
+  $('#flow-deploy').hide();
+  $('#flow-deployed').hide();
+  $('#password-input').focus();
+}
+
 async function getSimulationParameters() {
   THIS = 'getSimulationParameters:';
   console.log(THIS, 'running');
@@ -428,7 +563,7 @@ async function getSimulationParameters() {
       Accept: 'application/json',
       'Content-Type': 'application/json',
     },
-    body: JSON.stringify({ token }),
+    body: JSON.stringify({ token: localStorage.getItem('mfaToken') }),
   })
     .then((response) => response.json())
     .then((r) => {
@@ -446,147 +581,3 @@ async function getSimulationParameters() {
       console.log(THIS, err);
     });
 }
-// --------------------------------------------------------------------------------
-async function bookAppointment(e) {
-  e.preventDefault();
-  THIS = 'bookAppointment:';
-  userActive = true;
-
-  simResponse = $('.simulate-response');
-
-  $('#book_appointment_btn').addClass('loading');
-  simResponse.text('Please wait...').show();
-
-  const patientName = $('#patient-name').val();
-  const phoneNumber = $('#patient-phone-number').val();
-
-  if (patientName === '' || phoneNumber === '') {
-    showSimReponseError('Patient name and phone number must be filled');
-    return;
-  }
-
-  fetch('/deployment/simulation-event', {
-    method: 'POST',
-    headers: {
-      Accept: 'application/json',
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-      token: token,
-      command: 'BOOKED',
-      firstName: patientName,
-      phoneNumber: phoneNumber,
-    }),
-  })
-    .then(() => {
-      simRemindTimeout = 120; // seconds
-      setTimeout(updateSimRemindTimeout, 1000);
-      showSimReponseSuccess();
-    })
-    .catch(() => {
-      showSimReponseError('Unable to send your appointment request.');
-    })
-    .finally(() => {
-      $('#book_appointment_btn').removeClass('loading');
-    });
-}
-// ------------------------------------------------------------------------------
-function updateSimRemindTimeout() {
-  simRemindTimeout -= 1;
-  showSimReponseSuccess();
-  if (simRemindTimeout < 1) {
-    simResponse.fadeOut().removeClass('success');
-    $('#remind_appointment_btn').show();
-  } else {
-    setTimeout(updateSimRemindTimeout, 1000);
-  }
-}
-
-// --------------------------------------------------------------------------------
-async function remindAppointment(e) {
-  e.preventDefault();
-  THIS = 'remindAppointment:';
-  userActive = true;
-
-  simResponse = $('.simulate-response');
-
-  $('#remind_appointment_btn').addClass('loading');
-  simResponse.text('Please wait...').show();
-
-  fetch('/deployment/simulation-event', {
-    method: 'POST',
-    headers: {
-      Accept: 'application/json',
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-      token: token,
-      command: 'REMIND',
-    }),
-  })
-    .then((response) => response.json())
-    .then((r) => {
-      showSimReminderSuccess();
-    })
-    .catch(() => {
-      showSimReponseError('Unable to send your appointment reminder request.');
-    })
-    .finally(() => {
-      $('#remind_appointment_btn').removeClass('loading');
-    });
-}
-
-// --------------------------------------------------------------------------
-function showSimReponseError(message) {
-  simResponse.text(message).addClass('failure');
-  setTimeout(() => simResponse.fadeOut().removeClass('failure'), 4000);
-}
-function showSimReponseSuccess() {
-  simResponse
-    .text(
-      `Your appointment request has been sent. Please wait ${simRemindTimeout} seconds to simulate a reminder.`
-    )
-    .addClass('success');
-  // setTimeout(() => simResponse.fadeOut().removeClass('success'), 4000);
-}
-function showSimReminderSuccess() {
-  simResponse.text(`Your reminder request has been sent.`).addClass('success');
-  setTimeout(() => simResponse.fadeOut().removeClass('success'), 4000);
-}
-
-// --------------------------------------------------------------------------------
-
-function handleInvalidToken() {
-  $('#password-form').show();
-  $('#auth-successful').hide();
-  $('#mfa-form').hide();
-  $('#invalid-environment-variable').hide();
-  $('#valid-environment-variable').hide();
-  $('#flow-loader').hide();
-  $('#flow-deploy').hide();
-  $('#flow-deployed').hide();
-  $('#password-input').focus();
-}
-// --------------------------------------------------------------------------------
-
-function goHome() {
-  $('main').show();
-  $('#simulation-text').show();
-  $('#simulate-section').hide();
-}
-// --------------------------------------------------------------------------------
-
-function goSimulate() {
-  $('main').hide();
-  $('#simulation-text').hide();
-  $('#simulate-section').show();
-  getSimulationParameters();
-}
-
-// --------------------------------------------------------------------------------
-$('#auth-successful').hide();
-$('#mfa-form').hide();
-$('#simulate-section').hide();
-$('#password-form').show();
-$('#password-input').focus();
-$('#remind_appointment_btn').hide();

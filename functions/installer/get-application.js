@@ -30,6 +30,9 @@ exports.handler = async function (context, event, callback) {
     const messagingService = await client.messaging.services.list().then(services => services.find(
       service => service.friendlyName === process.env.APPLICATION_NAME
     ));
+
+    console.log("STUFF: ", account, phoneList, messagingService)
+    console.log("MORE STUFF: ", process.env.APPLICATION_NAME, context.APPLICATION_NAME);
   
     const variables = await readConfigurationVariables();
 

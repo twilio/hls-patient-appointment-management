@@ -20,15 +20,15 @@ exports.handler = async function (context, event, callback) {
   console.log(THIS, 'Starting');
   console.time(THIS);
   try {
-    assert(event.token, 'missing event.token');
-    if (!isValidAppToken(event.token, context)) {
-      const response = new Twilio.Response();
-      response.setStatusCode(401);
-      response.appendHeader('Content-Type', 'application/json');
-      response.setBody({ message: 'Unauthorized' });
+    // assert(event.token, 'missing event.token');
+    // if (!isValidAppToken(event.token, context)) {
+    //   const response = new Twilio.Response();
+    //   response.setStatusCode(401);
+    //   response.appendHeader('Content-Type', 'application/json');
+    //   response.setBody({ message: 'Unauthorized' });
 
-      return callback(null, response);
-    }
+    //   return callback(null, response);
+    // }
 
     // ---------- parameters
     const CUSTOMER_NAME = await getParam(context, 'CUSTOMER_NAME');

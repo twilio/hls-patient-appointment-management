@@ -7,12 +7,9 @@
 const CONFIGURATION_VARIABLES = [];
 
 window.addEventListener('load', async () => {
-  const serviceLoader = document.getElementById('service-loader');
-  const serviceDeploy = document.getElementById('service-deploy');
-  const serviceDeployed = document.getElementById('service-deployed');
-
   // Steps 1 and 2: Populate the field entries
   const appContext = await getAppContext();
+  console.log("app context", appContext);
   const account = appContext.account;
   const configurationVariables = appContext.configuration;
   const phoneList = appContext.phoneList;
@@ -48,14 +45,16 @@ window.addEventListener('load', async () => {
 });
 
 async function getAppContext() {
+  console.log("hello");
   const appResp = await fetch('/installer/get-application', {
     method: "GET",
     headers: {
       "Content-Type": "application/json",
-      "Accept": 'application/json',
     },
-  });
-  return await appResp.json();
+  })
+  .then(res => res.json())
+  .catch(err => console.error(err));
+  return appResp;
 }
 
 async function deployApplication(event) {
@@ -102,7 +101,8 @@ async function deployApplication(event) {
     },
     body: JSON.stringify({ configuration: configuration }),
   })
-  .then((resp) => {
+  .then(async (resp) => {
+      await deployStudioFlow();
       $('#service-deploying').hide();
       $('#service-deploy-button').prop('disabled', false);
       $('#service-deployed').show();
@@ -114,21 +114,7 @@ async function deployApplication(event) {
       $('#service-deploying').hide();
       $('#service-deploy-button').prop('disabled', false);
   });
-  console.log(serviceResp);
-
-
-}
-
-async function isServiceDeployed() {
-  const serviceResp = await fetch('/installer/check-application', {
-    method: "GET",
-    headers: {
-      "Content-Type": "application/json",
-      "Accept": 'application/json',
-    },
-  });
-  const resp = serviceResp.json();
-  return resp.deploy_state === "DEPLOYED" ? true : false;
+  console.log("serviceResp", serviceResp);  
 }
 
 async function addVariable(variable, currentValue = null) {
@@ -205,4 +191,43 @@ function validateInput() {
   }
 
   return CONFIGURATION_VARIABLES;
+}
+
+async function isStudioFlowDeployed() {
+  const studioFlowResp = await fetch('/installer/check-studio-flow', {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+      "Accept": 'application/json',
+    },
+  })
+  .then(resp => resp.json())
+  .catch(err => console.error(err));
+  return studioFlowResp.status === 'DEPLOYED' ? true : false;
+}
+
+async function isServiceDeployed() {
+  const serviceResp = await fetch('/installer/check-application', {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+      "Accept": 'application/json',
+    },
+  })
+  .then(resp => resp.json())
+  .catch(err => console.error(err));
+  return serviceResp.deploy_state === "DEPLOYED" ? true : false;
+}
+
+async function deployStudioFlow() {
+  const flowResp = await fetch('/installer/deploy-studio-flow', {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+      "Accept": 'application/json',
+    },
+  })
+  .then(resp => resp.json())
+  .catch(err => console.error(err));
+  console.log("deployStudioFlowm", flowResp);
 }

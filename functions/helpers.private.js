@@ -418,4 +418,5 @@ module.exports = {
   setParam,
   validateAppointment,
   assertLocalhost,
+  getAllParams,
 };

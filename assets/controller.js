@@ -225,14 +225,9 @@ function checkStudioFlow() {
 }
 
 // --------------------------------------------------------------------------------
-function deployStudioFlow(e) {
+function deployStudioFlow() {
   THIS = 'deployStudioFlow:';
   console.log(THIS, 'running');
-  userActive = true;
-
-  e.preventDefault();
-  $('#flow-deploy .button').addClass('loading');
-  $('.flow-loader.button-loader').show();
 
   fetch('/deployment/deploy-studio-flow', {
     method: 'POST',
@@ -255,8 +250,6 @@ function deployStudioFlow(e) {
     })
     .catch((err) => {
       console.log(THIS, err);
-      $('#flow-deploy .button').removeClass('loading');
-      $('.flow-loader.button-loader').hide();
     });
 }
 

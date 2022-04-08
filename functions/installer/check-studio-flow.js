@@ -50,7 +50,7 @@ exports.handler = async function (context, event, callback) {
   } catch (err) {
     console.error(THIS, err);    
     response.setStatusCode(400);
-    return callback(err, response)
+    return callback(err, response);
   } finally {
     console.timeEnd(THIS);
   }

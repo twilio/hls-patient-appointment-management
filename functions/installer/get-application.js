@@ -30,16 +30,13 @@ exports.handler = async function (context, event, callback) {
     const messagingService = await client.messaging.services.list().then(services => services.find(
       service => service.friendlyName === process.env.APPLICATION_NAME
     ));
-
-    console.log("STUFF: ", account, phoneList, messagingService)
-    console.log("MORE STUFF: ", process.env.APPLICATION_NAME, context.APPLICATION_NAME);
   
     const variables = await readConfigurationVariables();
 
     response.setBody({
       account: accountInfo,
       phoneList: phones,
-      messagingServiceSid: messagingService.sid,
+      messagingServiceSid: (messagingService && messagingService.sid) ? messagingService.sid : 'NOT-DEPLOYED', 
       configuration: variables,
     });
     return callback(null, response);
@@ -59,28 +56,3 @@ async function readConfigurationVariables() {
   const configuration = configure_env.parser.parse(payload)
   return configuration.variables;
 }
-
-// Get the process.env and parse the appropriate info to give to client
-// function getParsedEnv(env) {
-//   const excludeWords = [
-//     "CODE",
-//     "SALT",
-//     "REMINDER",
-//     "TOKEN",
-//     "SID",
-//     "__",
-//     "APPLICATION_NAME",
-//   ]
-//   const parsedEnv = {};
-//   for (const [key, value] of Object.entries(env)) {
-//     //console.log(key, value);
-//     if (excludeWords.some(val => key.indexOf(val) >= 0)) continue;
-//     const envKey = key.split("_");
-//     const formattedKey = envKey.map(word => {
-//       return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
-//     }).join(" ");
-//     console.log(formattedKey);
-//     parsedEnv[formattedKey] = value;
-//   }
-//   return parsedEnv;
-// }

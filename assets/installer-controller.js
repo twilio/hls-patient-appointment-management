@@ -30,18 +30,22 @@ window.addEventListener('load', async () => {
     await addVariable(v, v.value);
   }
 
-  if (messagingServiceSid) {
+  if (messagingServiceSid && messagingServiceSid !== 'NOT-DEPLOYED' && isServiceDeployed()) {
     $('#messaging_service_sid').val(messagingServiceSid);
     $('#messaging_service_sid').prop("disabled", true);
-  }
-
-  // Step 3: Check application and show deploy button.
-  if (isServiceDeployed()) {
     $('#service-deployed').show();
-  } else {
+  } else if (messagingServiceSid && messagingServiceSid === 'NOT-DEPLOYED') {
     $('#service-deploy').show();
+    $('service-deployed').hide();
+    console.log(CONFIGURATION_VARIABLES);
+    const idxToRemove = CONFIGURATION_VARIABLES.findIndex(variable => {
+      return variable.key === 'MESSAGING_SERVICE_SID';
+    });
+    if(idxToRemove !== -1) {
+      CONFIGURATION_VARIABLES.splice(idxToRemove, 1);
+    }
+    $('.clone-for-MESSAGING_SERVICE_SID').hide();
   }
-
 });
 
 async function getAppContext() {
@@ -57,14 +61,15 @@ async function getAppContext() {
   return appResp;
 }
 
+// deployApplication() is attached to the deploy buttons 
 async function deployApplication(event) {
+  console.log("CLICKED");
   event.preventDefault();
-  // deploy functions
-  // deploy Studio flow
   $('#service-deployed').hide();
 
   const input = validateInput();
   const validated = input.every(i => i.isValid);
+  console.log(validated);
   if (!validated) return;
   console.log('variable values validated');
 
@@ -102,17 +107,19 @@ async function deployApplication(event) {
     body: JSON.stringify({ configuration: configuration }),
   })
   .then(async (resp) => {
-      await deployStudioFlow();
-      $('#service-deploying').hide();
-      $('#service-deploy-button').prop('disabled', false);
-      $('#service-deployed').show();
-      console.log('Service successfully deployed');
-      return resp.json();
+    await deployMessagingService('CREATE');
+    await deployStudioFlow();
+    $('#service-deploying').hide();
+    $('#service-deploy-button').prop('disabled', false);
+    $('#service-deployed').show();
+    $('#service-deploy').hide();
+    console.log('Service successfully deployed');
+    return resp.json();
   })
   .catch ((err) => {
-      console.log("Error (deployApplication()): ", err);
-      $('#service-deploying').hide();
-      $('#service-deploy-button').prop('disabled', false);
+    console.log("Error (deployApplication()): ", err);
+    $('#service-deploying').hide();
+    $('#service-deploy-button').prop('disabled', false);
   });
   console.log("serviceResp", serviceResp);  
 }
@@ -228,6 +235,24 @@ async function deployStudioFlow() {
     },
   })
   .then(resp => resp.json())
-  .catch(err => console.error(err));
+  .catch(err => console.log(err));
   console.log("deployStudioFlowm", flowResp);
+}
+
+async function deployMessagingService(action) {
+  const messagingServiceResp = await fetch('/installer/deploy-messaging-service', {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "Accept": 'application/json',
+    },
+    body: JSON.stringify({action}),
+  })
+  .then(resp => resp.json())
+  .then(resp => {
+    console.log("RESP", resp);
+    return resp;
+  })
+  .catch(err => console.log(err));
+  console.log("messaging", messagingServiceResp);
 }

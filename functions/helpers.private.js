@@ -21,12 +21,8 @@
  * sets environment variable
  * --------------------------------------------------------------------------------
  */
-const AWS = require('aws-sdk');
 const assert = require('assert');
-const validator = require('validator');
-
 async function setParam(context, key, value) {
-  const Twilio = require('twilio');
 
   const onLocalhost = Boolean(
     context.DOMAIN_NAME && context.DOMAIN_NAME.startsWith('localhost')
@@ -65,6 +61,12 @@ async function setParam(context, key, value) {
       .then((v) => console.log('Updated variable', v.key));
   }
   console.log('Assigned', key, '=', value);
+}
+
+function assertLocalhost(context) {
+  assert(context.DOMAIN_NAME.startsWith('localhost:'), `Can only run on localhost!!!`);
+  assert(process.env.ACCOUNT_SID, 'ACCOUNT_SID not set in localhost environment!!!');
+  assert(process.env.AUTH_TOKEN, 'AUTH_TOKEN not set in localhost environment!!!');
 }
 
 /*
@@ -137,6 +139,11 @@ async function getParam(context, key) {
           .then(services => services.find(service => service.friendlyName === THIS_APPLICATION_NAME));
         return messagingService.sid;
       }
+      case 'TWILIO_SERVICE_SID': {
+        const services = await client.serverless.services.list();
+        const service = services.find(async s => s.uniqueName === await getParam(context, 'APPLICATION_NAME'));
+        return (service && service.sid) ? service.sid : null;
+      }
       case 'TWILIO_ENVIRONMENT_DOMAIN_NAME': {
         const service_sid = await getParam(context, 'TWILIO_SERVICE_SID');
         if (service_sid === null) {
@@ -156,10 +163,7 @@ async function getParam(context, key) {
             }
           })
         );
-        if (flow_sid !== null) {
-          return flow_sid;
-        }
-        return null;
+        return flow_sid;
       }
       case 'TWILIO_SERVICE_SID': {
         let service_sid = null;
@@ -213,6 +217,33 @@ async function getParam(context, key) {
   } catch (err) {
     console.log(`Unexpected error in getParam for ${key} ... returning null`);
     return null;
+  }
+}
+
+async function getAllParams(context) {
+
+  const keys_context = Object.keys(context);
+  // keys defined in getParam function above
+  const keys_derived = [
+    'IS_LOCALHOST',
+  ];
+
+  // to force saving of 'secret'
+  await getParam(context, 'TWILIO_API_KEY_SID');
+
+  const keys_all = keys_context.concat(keys_derived).sort();
+  try {
+
+    const result = {};
+    for (k of keys_all) {
+      if (k === 'getTwilioClient') continue; // exclude getTwilioClient function
+      result[k] = await getParam(context, k);
+    }
+    return result;
+
+  } catch (err) {
+    console.log(err);
+    throw err;
   }
 }
 
@@ -386,4 +417,6 @@ module.exports = {
   getParam,
   setParam,
   validateAppointment,
+  assertLocalhost,
+  getAllParams,
 };

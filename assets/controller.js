@@ -25,7 +25,6 @@ const fullUrl = baseUrl.href.substr(0, baseUrl.href.length - 1);
 
 window.addEventListener('load', async () => {
   if (localStorage.getItem('mfaToken')) {
-    console.log("hello");
     $('#password-form').hide();
     $('#mfa-form').hide();
     $('#ready-to-use').show();
@@ -34,7 +33,7 @@ window.addEventListener('load', async () => {
   const timer = (ms) => new Promise((res) => setTimeout(res, ms));
   $('#auth-successful').hide();
   $('#mfa-form').hide();
-  $('#simulate-section').hide();
+  // $('#simulate-section').hide();
   $('#password-form').show();
   $('#password-input').focus();
   $('#remind_appointment_btn').hide();

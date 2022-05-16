@@ -2,7 +2,6 @@
 
 const path0 = Runtime.getFunctions().helpers.path;
 const { getParam, setParam } = require(path0);
-const AWS = require('aws-sdk');
 
 const ts = Math.round(new Date().getTime() / 1000);
 const tsTomorrow = ts + 17 * 3600;
@@ -18,29 +17,34 @@ async function createAppointment(context, appointment) {
     from: context.TWILIO_PHONE_NUMBER,
     parameters: appointment,
   };
-  const response = await context
-    .getTwilioClient()
-    .studio.flows(context.TWILIO_FLOW_SID)
-    .executions.create(params);
-  const executionSid = response.sid;
+  try {
+    const response = await context
+      .getTwilioClient()
+      .studio.flows(context.TWILIO_FLOW_SID)
+      .executions.create(params);
+      const executionSid = response.sid;
+  }
+  catch(err)  {
+    console.log("Error", err)
+  }
 }
 
 async function remindAppointment(context) {
-  const AWS_CONFIG = {
-    accessKeyId: await getParam(context, 'AWS_ACCESS_KEY_ID'),
-    secretAccessKey: await getParam(context, 'AWS_SECRET_ACCESS_KEY'),
-    region: await getParam(context, 'AWS_REGION'),
-  };
-  context.Lambda = new AWS.Lambda(AWS_CONFIG);
-  context.AWS_LAMBDA_SEND_REMINDERS = await getParam(
-    context,
-    'AWS_LAMBDA_SEND_REMINDERS'
-  );
-  const params = {
-    FunctionName: context.AWS_LAMBDA_SEND_REMINDERS,
-    InvocationType: 'RequestResponse',
-  };
-  const response = await context.Lambda.invoke(params).promise();
+  // const AWS_CONFIG = {
+  //   accessKeyId: await getParam(context, 'AWS_ACCESS_KEY_ID'),
+  //   secretAccessKey: await getParam(context, 'AWS_SECRET_ACCESS_KEY'),
+  //   region: await getParam(context, 'AWS_REGION'),
+  // };
+  // context.Lambda = new AWS.Lambda(AWS_CONFIG);
+  // context.AWS_LAMBDA_SEND_REMINDERS = await getParam(
+  //   context,
+  //   'AWS_LAMBDA_SEND_REMINDERS'
+  // );
+  // const params = {
+  //   FunctionName: context.AWS_LAMBDA_SEND_REMINDERS,
+  //   InvocationType: 'RequestResponse',
+  // };
+  // const response = await context.Lambda.invoke(params).promise();
 }
 
 exports.handler = function (context, event, callback) {

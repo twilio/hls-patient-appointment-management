@@ -24,19 +24,18 @@ delete baseUrl.search;
 const fullUrl = baseUrl.href.substr(0, baseUrl.href.length - 1);
 
 window.addEventListener('load', async () => {
-  if (localStorage.getItem('mfaToken')) {
-    $('#password-form').hide();
-    $('#mfa-form').hide();
-    $('#ready-to-use').show();
-  }
-
-  const timer = (ms) => new Promise((res) => setTimeout(res, ms));
-  $('#auth-successful').hide();
   $('#mfa-form').hide();
-  // $('#simulate-section').hide();
+  $('#simulate-section').hide();
   $('#password-form').show();
   $('#password-input').focus();
   $('#remind_appointment_btn').hide();
+
+  if (localStorage.getItem('mfaToken')) {
+    $('#password-form').hide();
+    $('#auth-successful').show();
+    $('#mfa-form').hide();
+    $('#ready-to-use').show();
+  }
 });
 
 function goSimulate() {
@@ -336,6 +335,8 @@ function check() {
       if (errors.length === 0) {
         // no errors, so proceed
         $('#valid-environment-variable').show();
+        // TODO: temperory fix to show simulation button
+        readyToUse();
         checkStudioFlow();
       } else {
         $('#invalid-environment-variable').show();

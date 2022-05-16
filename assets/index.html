@@ -31,9 +31,6 @@
     </p>
   </header>
   <main>
-    <script>
-    let token = null;
-    </script>
     <div id="password-form" style="display: none;">
       <p>
         To protect sensitive data, a password is required.
@@ -65,14 +62,14 @@
     </div>
     <p id="auth-successful"><span class="checkmark">&#10003;</span> Authenticated successfully</p>
 
-    <!-- <section>
+    <section>
       <div id="invalid-environment-variable" style="display: none;" class="deployer">
         <h4>Please correct the following environment variables</h4>
       </div>
       <div id="valid-environment-variable" style="display: none;" class="deployer">
         <h4><span class="checkmark">&#10003;</span> Validated Environment Variables</h4>
       </div>
-    </section> -->
+    </section>
 
     <!-- <section>
       <div class="flow-loader"></div>
@@ -126,15 +123,15 @@
       <div id="ready-to-use" style="display: none;">
         <h4><span class="checkmark">&#10003;</span> Appointment Management with EHR Integration Application is Ready for Integration</h4>
 
-        <p>
+        <!-- <p>
           In order to complete the EHR integration,
           you'll need to provide the following information to your EHR integration implementor.
           For more details, please refer to <a href="https://twilio-cms-prod.s3.amazonaws.com/documents/EHR_Appointment_Management_App_EHR_Integration_Guide.pdf">EHR Integration Guide</a>.
-        </p>
+        </p> -->
         <p>
           <button onClick="goSimulate()">Go To Simulation Page</button>
         </p>
-        <table width="100%">
+        <!-- <table width="100%">
           <tr>
             <th>Name</th>
             <th>Value (where to find)</th>
@@ -155,7 +152,7 @@
             <td>Twilio Phone Number</td>
             <td id="integration-twlo-phone-number">Find in <i>Environment Variables</i> in Functions Settings</td>
           </tr>
-        </table>
+        </table> -->
         <p>
           Once integration is in place with your EHR,
           appointment events will start sending to this application.

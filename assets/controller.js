@@ -475,10 +475,28 @@ async function refreshToken() {
     })
     .catch((err) => console.log(err));
 }
+
 // --------------------------------------------------------------------------------
-async function bookAppointment(e) {
+/**
+ * This function triggers the simulate-event function with fiven parameters
+ * @param {*} params - Parameters for the event
+ */
+function triggerEvent(params) {
+  console.log(params)
+  return fetch('/deployment/simulation-event', {
+    method: 'POST',
+    headers: {
+      Accept: 'application/json',
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(params),
+  })
+}
+
+// --------------------------------------------------------------------------------
+async function updateAppointment(e, command) {
   e.preventDefault();
-  THIS = 'bookAppointment:';
+  THIS = 'updateAppointment:';
   userActive = true;
 
   simResponse = $('.simulate-response');
@@ -488,37 +506,76 @@ async function bookAppointment(e) {
 
   const patientName = $('#patient-name').val();
   const phoneNumber = $('#patient-phone-number').val();
+  const appointmentDate = $('#date-time').val();
+  const appointmentProvider = $('#provider').val();
+  const appointmentLocation = $('#location').val();
 
   if (patientName === '' || phoneNumber === '') {
     showSimReponseError('Patient name and phone number must be filled');
     return;
   }
 
-  fetch('/deployment/simulation-event', {
-    method: 'POST',
-    headers: {
-      Accept: 'application/json',
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
+  try {
+    await triggerEvent({
       token: token,
-      command: 'BOOKED',
+      command,
       firstName: patientName,
       phoneNumber: phoneNumber,
-    }),
-  })
-    .then(() => {
-      simRemindTimeout = 120; // seconds
-      setTimeout(updateSimRemindTimeout, 1000);
-      showSimReponseSuccess();
-    })
-    .catch(() => {
-      showSimReponseError('Unable to send your appointment request.');
-    })
-    .finally(() => {
-      $('#book_appointment_btn').removeClass('loading');
+      appointmentDate,
+      appointmentProvider,
+      appointmentLocation,
     });
+  }
+  catch {
+    showSimReponseError('Unable to send your appointment request.');
+  }
+  finally {
+    $('#book_appointment_btn').removeClass('loading');
+  }
 }
+
+// ------------------------------------------------------------------------------
+
+async function bookAppointment(e) {
+  e.preventDefault();
+  THIS = 'bookAppointment:';
+  simResponse = $('.simulate-response');
+  $('#book_appointment_btn').addClass('loading');
+  simResponse.text('Please wait...').show();
+  await updateAppointment(event, 'BOOKED')
+  simRemindTimeout = 120; // seconds
+  setTimeout(updateSimRemindTimeout, 1000);
+  showSimReponseSuccess();
+}
+
+// ------------------------------------------------------------------------------
+
+async function modifyAppointment(e) {
+  e.preventDefault();
+  THIS = 'modifyAppointment:';
+  simResponse = $('.simulate-response');
+  $('#modify_appointment_btn').addClass('loading');
+  simResponse.text('Please wait...').show();
+  await updateAppointment(e, 'MODIFIED')
+  // simRemindTimeout = 120; // seconds
+  // setTimeout(updateSimRemindTimeout, 1000);
+  // showSimReponseSuccess();
+}
+
+// ------------------------------------------------------------------------------
+
+async function rescheduleAppointment(e) {
+  e.preventDefault();
+  THIS = 'rescheduleAppointment:';
+  simResponse = $('.simulate-response');
+  $('#reschedule_appointment_btn').addClass('loading');
+  simResponse.text('Please wait...').show();
+  await updateAppointment(e, 'RESCHEDULED')
+  // simRemindTimeout = 120; // seconds
+  // setTimeout(updateSimRemindTimeout, 1000);
+  // showSimReponseSuccess();
+}
+
 // ------------------------------------------------------------------------------
 function updateSimRemindTimeout() {
   simRemindTimeout -= 1;

@@ -3,13 +3,6 @@
 /*
  * main controller javascript used by index.html
  *
- * The following functions are executed in sequence for proper deployment order.
- * Each check function will call the next check function when deployment is complete.
- * - checkStudioFlow
- * - checkAWSBucket
- * - checkAWSApplication
- * - readyToUse
- *
  */
 let phoneNumber;
 let flowSid;
@@ -494,8 +487,7 @@ function triggerEvent(params) {
 }
 
 // --------------------------------------------------------------------------------
-async function updateAppointment(e, command) {
-  e.preventDefault();
+async function updateAppointment(command) {
   THIS = 'updateAppointment:';
   userActive = true;
 
@@ -542,7 +534,7 @@ async function bookAppointment(e) {
   simResponse = $('.simulate-response');
   $('#book_appointment_btn').addClass('loading');
   simResponse.text('Please wait...').show();
-  await updateAppointment(event, 'BOOKED')
+  await updateAppointment(e, 'BOOKED')
   simRemindTimeout = 120; // seconds
   setTimeout(updateSimRemindTimeout, 1000);
   showSimReponseSuccess();
@@ -556,10 +548,8 @@ async function modifyAppointment(e) {
   simResponse = $('.simulate-response');
   $('#modify_appointment_btn').addClass('loading');
   simResponse.text('Please wait...').show();
-  await updateAppointment(e, 'MODIFIED')
-  // simRemindTimeout = 120; // seconds
-  // setTimeout(updateSimRemindTimeout, 1000);
-  // showSimReponseSuccess();
+  await updateAppointment('MODIFIED')
+  showSimReponseSuccess();
 }
 
 // ------------------------------------------------------------------------------
@@ -570,10 +560,8 @@ async function rescheduleAppointment(e) {
   simResponse = $('.simulate-response');
   $('#reschedule_appointment_btn').addClass('loading');
   simResponse.text('Please wait...').show();
-  await updateAppointment(e, 'RESCHEDULED')
-  // simRemindTimeout = 120; // seconds
-  // setTimeout(updateSimRemindTimeout, 1000);
-  // showSimReponseSuccess();
+  await updateAppointment('RESCHEDULED')
+  showSimReponseSuccess();
 }
 
 // ------------------------------------------------------------------------------

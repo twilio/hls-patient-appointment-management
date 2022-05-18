@@ -67,7 +67,6 @@ exports.handler = function (context, event, callback) {
 
   const response = new Twilio.Response();
   response.appendHeader('Content-Type', 'application/json');
-  const apptDatetime = new Date(tsTomorrow * 1000);
   const appointment = {
     event_type: event.command,
     event_datetime_utc: null,
@@ -82,7 +81,7 @@ exports.handler = function (context, event, callback) {
     appointment_location: event.appointmentLocation,
     appointment_id: '20000',
     appointment_timezone: '-0700',
-    appointment_datetime: apptDatetime.toISOString(),
+    appointment_datetime: event.appointmentDate,
   };
 
   switch (event.command) {

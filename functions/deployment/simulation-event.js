@@ -30,21 +30,7 @@ async function createAppointment(context, appointment) {
 }
 
 async function remindAppointment(context) {
-  // const AWS_CONFIG = {
-  //   accessKeyId: await getParam(context, 'AWS_ACCESS_KEY_ID'),
-  //   secretAccessKey: await getParam(context, 'AWS_SECRET_ACCESS_KEY'),
-  //   region: await getParam(context, 'AWS_REGION'),
-  // };
-  // context.Lambda = new AWS.Lambda(AWS_CONFIG);
-  // context.AWS_LAMBDA_SEND_REMINDERS = await getParam(
-  //   context,
-  //   'AWS_LAMBDA_SEND_REMINDERS'
-  // );
-  // const params = {
-  //   FunctionName: context.AWS_LAMBDA_SEND_REMINDERS,
-  //   InvocationType: 'RequestResponse',
-  // };
-  // const response = await context.Lambda.invoke(params).promise();
+  // TODO: To be implemented
 }
 
 exports.handler = function (context, event, callback) {

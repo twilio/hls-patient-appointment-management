@@ -73,11 +73,10 @@ async function getSimulationParameters() {
     .then((response) => response.json())
     .then((r) => {
       const date = new Date(r['appointmentTimestamp']);
-      var ds = date.toDateString() + ' ' + date.toLocaleTimeString();
 
       $('#name-sent-from').val(r['customerName']);
       $('#number-sent-from').val(r['customerPhoneNumber']);
-      $('#date-time').val(ds);
+      $('#date-time').val(date.toISOString().substring(0, 16));
       $('#provider').val(r['provider']);
       $('#location').val(r['location']);
       // Aug 23, 2021 at 4:30 PM
@@ -534,7 +533,7 @@ async function bookAppointment(e) {
   simResponse = $('.simulate-response');
   $('#book_appointment_btn').addClass('loading');
   simResponse.text('Please wait...').show();
-  await updateAppointment(e, 'BOOKED')
+  await updateAppointment('BOOKED')
   simRemindTimeout = 120; // seconds
   setTimeout(updateSimRemindTimeout, 1000);
   showSimReponseSuccess();

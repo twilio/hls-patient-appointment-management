@@ -27,6 +27,7 @@ window.addEventListener("load", async () => {
   $("#simulate-section").hide();
   $("#password-form").show();
   $("#password-input").focus();
+  $("#auth-successful").hide();
   $("#remind_appointment_btn").hide();
 
   if (localStorage.getItem("mfaToken")) {

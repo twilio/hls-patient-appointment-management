@@ -10,8 +10,6 @@ function handleInvalidToken() {
   $("#password-form").show();
   $("#auth-successful").hide();
   $("#mfa-form").hide();
-  $("#invalid-environment-variable").hide();
-  $("#valid-environment-variable").hide();
   $("#flow-loader").hide();
   $("#flow-deploy").hide();
   $("#flow-deployed").hide();
@@ -45,46 +43,6 @@ function readyToUse() {
   THIS = "readyToUse:";
   console.log(THIS, "running");
   $("#ready-to-use").show();
-}
-
-/**
- * Doing deployment checks to ensure every flow is working fine
- */
-function check() {
-  THIS = "check:";
-  console.log(THIS, "running");
-  userActive = true;
-
-  fetch("/deployment/check", {
-    method: "POST",
-    headers: {
-      Accept: "application/json",
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({ token: token }),
-  })
-    .then((response) => {
-      if (!response.ok) if (response.status === 401) handleInvalidToken();
-      return response.text();
-    })
-    .then((text) => {
-      console.log(text);
-      errors = JSON.parse(text);
-      if (errors.length === 0) {
-        // no errors, so proceed
-        $("#valid-environment-variable").show();
-        readyToUse();
-      } else {
-        $("#invalid-environment-variable").show();
-        for (e of errors) {
-          const error = $("<p></p>").text(JSON.stringify(e));
-          $("#invalid-environment-variable").append(error);
-        }
-      }
-    })
-    .catch((err) => {
-      console.log(THIS, err);
-    });
 }
 
 /**
@@ -203,8 +161,8 @@ function login(e) {
       var decodedToken = parseJwt(token);
       if (decodedToken["aud"] === "app") {
         $("#auth-successful").show();
+        readyToUse();
         scheduleTokenRefresh();
-        check();
       } else {
         $("#mfa-form").show();
         $("#mfa-input").focus();

@@ -73,6 +73,22 @@ async function getSimulationParameters() {
     });
 }
 
+// --------------------------------------------------------------------------------
+/**
+ * This function triggers the simulate-event function with fiven parameters
+ * @param {*} params - Parameters for the event
+ */
+ function triggerEvent(params) {
+  console.log(params)
+  return fetch('/deployment/simulation-event', {
+    method: 'POST',
+    headers: {
+      Accept: 'application/json',
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(params),
+  })
+}
 
 // --------------------------------------------------------------------------------
 async function updateAppointment(command) {

@@ -8,6 +8,13 @@ let phoneNumber;
 let flowSid;
 let userActive = true;
 let simRemindTimeout = 0;
+let currentEvent = null;
+
+const successMessages = (simRemindTimeout) => ({
+  BOOKED: `Your appointment request has been sent. Please wait ${simRemindTimeout} seconds to simulate a reminder.`,
+  MODIFIED: `Your appointment request has been modified`,
+  RESCHEDULED: `Your appointment request has been rescheduled`,
+});
 
 const baseUrl = new URL(location.href);
 baseUrl.pathname = baseUrl.pathname.replace(/\/index\.html$/, "");
@@ -59,13 +66,13 @@ async function getSimulationParameters() {
   })
     .then((response) => response.json())
     .then((r) => {
-      const date = new Date(r['appointmentTimestamp']);
+      const date = new Date(r["appointmentTimestamp"]);
 
-      $('#name-sent-from').val(r['customerName']);
-      $('#number-sent-from').val(r['customerPhoneNumber']);
-      $('#date-time').val(date.toISOString().substring(0, 16));
-      $('#provider').val(r['provider']);
-      $('#location').val(r['location']);
+      $("#name-sent-from").val(r["customerName"]);
+      $("#number-sent-from").val(r["customerPhoneNumber"]);
+      $("#date-time").val(date.toISOString().substring(0, 16));
+      $("#provider").val(r["provider"]);
+      $("#location").val(r["location"]);
       // Aug 23, 2021 at 4:30 PM
     })
     .catch((err) => {
@@ -78,21 +85,21 @@ async function getSimulationParameters() {
  * This function triggers the simulate-event function with fiven parameters
  * @param {*} params - Parameters for the event
  */
- function triggerEvent(params) {
-  console.log(params)
-  return fetch('/deployment/simulation-event', {
-    method: 'POST',
+function triggerEvent(params) {
+  console.log(params);
+  return fetch("/deployment/simulation-event", {
+    method: "POST",
     headers: {
-      Accept: 'application/json',
-      'Content-Type': 'application/json',
+      Accept: "application/json",
+      "Content-Type": "application/json",
     },
     body: JSON.stringify(params),
-  })
+  });
 }
 
 // --------------------------------------------------------------------------------
 async function updateAppointment(command) {
-  THIS = 'updateAppointment:';
+  THIS = "updateAppointment:";
   userActive = true;
 
   simResponse = $(".simulate-response");
@@ -100,11 +107,11 @@ async function updateAppointment(command) {
   $("#book_appointment_btn").addClass("loading");
   simResponse.text("Please wait...").show();
 
-  const patientName = $('#patient-name').val();
-  const phoneNumber = $('#patient-phone-number').val();
-  const appointmentDate = $('#date-time').val();
-  const appointmentProvider = $('#provider').val();
-  const appointmentLocation = $('#location').val();
+  const patientName = $("#patient-name").val();
+  const phoneNumber = $("#patient-phone-number").val();
+  const appointmentDate = $("#date-time").val();
+  const appointmentProvider = $("#provider").val();
+  const appointmentLocation = $("#location").val();
 
   if (patientName === "" || phoneNumber === "") {
     showSimReponseError("Patient name and phone number must be filled");
@@ -121,12 +128,10 @@ async function updateAppointment(command) {
       appointmentProvider,
       appointmentLocation,
     });
-  }
-  catch {
-    showSimReponseError('Unable to send your appointment request.');
-  }
-  finally {
-    $('#book_appointment_btn').removeClass('loading');
+  } catch {
+    showSimReponseError("Unable to send your appointment request.");
+  } finally {
+    $("#book_appointment_btn").removeClass("loading");
   }
 }
 
@@ -134,11 +139,12 @@ async function updateAppointment(command) {
 
 async function bookAppointment(e) {
   e.preventDefault();
-  THIS = 'bookAppointment:';
-  simResponse = $('.simulate-response');
-  $('#book_appointment_btn').addClass('loading');
-  simResponse.text('Please wait...').show();
-  await updateAppointment('BOOKED')
+  currentEvent = "BOOKED";
+  THIS = "bookAppointment:";
+  simResponse = $(".simulate-response");
+  $("#book_appointment_btn").addClass("loading");
+  simResponse.text("Please wait...").show();
+  await updateAppointment(currentEvent);
   simRemindTimeout = 120; // seconds
   setTimeout(updateSimRemindTimeout, 1000);
   showSimReponseSuccess();
@@ -148,11 +154,14 @@ async function bookAppointment(e) {
 
 async function modifyAppointment(e) {
   e.preventDefault();
-  THIS = 'modifyAppointment:';
-  simResponse = $('.simulate-response');
-  $('#modify_appointment_btn').addClass('loading');
-  simResponse.text('Please wait...').show();
-  await updateAppointment('MODIFIED')
+  currentEvent = "MODIFIED";
+  THIS = "modifyAppointment:";
+  simResponse = $(".simulate-response");
+  $("#modify_appointment_btn").addClass("loading");
+  simResponse.text("Please wait...").show();
+  await updateAppointment(currentEvent);
+  simRemindTimeout = 5; // seconds
+  setTimeout(updateSimRemindTimeout, 1000);
   showSimReponseSuccess();
 }
 
@@ -160,11 +169,14 @@ async function modifyAppointment(e) {
 
 async function rescheduleAppointment(e) {
   e.preventDefault();
-  THIS = 'rescheduleAppointment:';
-  simResponse = $('.simulate-response');
-  $('#reschedule_appointment_btn').addClass('loading');
-  simResponse.text('Please wait...').show();
-  await updateAppointment('RESCHEDULED')
+  currentEvent = "RESCHEDULED";
+  THIS = "rescheduleAppointment:";
+  simResponse = $(".simulate-response");
+  $("#reschedule_appointment_btn").addClass("loading");
+  simResponse.text("Please wait...").show();
+  await updateAppointment(currentEvent);
+  simRemindTimeout = 5; // seconds
+  setTimeout(updateSimRemindTimeout, 1000);
   showSimReponseSuccess();
 }
 
@@ -219,13 +231,10 @@ function showSimReponseError(message) {
   simResponse.text(message).addClass("failure");
   setTimeout(() => simResponse.fadeOut().removeClass("failure"), 4000);
 }
-function showSimReponseSuccess() {
+function showSimReponseSuccess(event = currentEvent) {
   simResponse
-    .text(
-      `Your appointment request has been sent. Please wait ${simRemindTimeout} seconds to simulate a reminder.`
-    )
+    .text(successMessages(simRemindTimeout)[event])
     .addClass("success");
-  // setTimeout(() => simResponse.fadeOut().removeClass('success'), 4000);
 }
 function showSimReminderSuccess() {
   simResponse.text(`Your reminder request has been sent.`).addClass("success");

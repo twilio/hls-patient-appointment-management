@@ -31,9 +31,9 @@ exports.handler = async function (context, event, callback) {
     // }
 
     // ---------- parameters
-    const CUSTOMER_NAME = await getParam(context, 'CUSTOMER_NAME');
+    const CUSTOMER_NAME = await getParam(context, 'CUSTOMER_NAME') || event.configuration['CUSTOMER_NAME'];
     const APPLICATION_NAME = await getParam(context, 'APPLICATION_NAME');
-    const TWILIO_PHONE_NUMBER = await getParam(context, 'TWILIO_PHONE_NUMBER');
+    const TWILIO_PHONE_NUMBER = await getParam(context, 'TWILIO_PHONE_NUMBER') || event.configuration['TWILIO_PHONE_NUMBER'];;
     const TWILIO_SERVICE_SID = await getParam(context, 'TWILIO_SERVICE_SID');
     const TWILIO_ENVIRONMENT_SID = await getParam(
       context,

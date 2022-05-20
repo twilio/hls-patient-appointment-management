@@ -29,7 +29,10 @@ exports.handler = async function (context, event, callback) {
       phoneNumbers = phoneList.filter((phone) => phone.capabilities.sms && !phone.smsUrl);
     }
 
-    console.log(phoneNumbers);
+    // If there is no phone numbers with sms capabilities, create a new one with sms capability.
+    if(!phoneNumbers.length) {
+      phoneNumbers = await createTwilioPhoneNumber(context)
+    }
 
     const phones = phoneNumbers.map(phone => {
       return {
@@ -68,3 +71,39 @@ async function readConfigurationVariables() {
   const configuration = configure_env.parser.parse(payload)
   return configuration.variables;
 }
+
+
+/**
+ * Create a new phone number and returns it
+ * @param {*} context
+ * @returns
+ */
+
+ async function createTwilioPhoneNumber (context) {
+  const client = context.getTwilioClient();
+
+  console.log("Buying a new number....");
+
+  const phoneNumbers = await client
+    .availablePhoneNumbers("US")
+    .local.list({ areaCode: 510, limit: 1 });
+
+  console.log("Available numbers....", phoneNumbers);
+
+  if (!phoneNumbers.length) {
+    return [];
+  }
+
+  const { phoneNumber } = phoneNumbers[0];
+
+  console.log("Selected number...", phoneNumber);
+
+  const createdPhoneNumber = await client.incomingPhoneNumbers.create({
+    phoneNumber,
+    capabilities: {
+      sms: true,
+    },
+  });
+
+  return [createdPhoneNumber];
+};

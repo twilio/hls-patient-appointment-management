@@ -108,7 +108,7 @@ async function deployApplication(event) {
   })
   .then(async (resp) => {
     await deployMessagingService('CREATE');
-    await deployStudioFlow();
+    await deployStudioFlow(configuration);
     $('#service-deploying').hide();
     $('#service-deploy-button').prop('disabled', false);
     $('#service-deployed').show();
@@ -226,13 +226,14 @@ async function isServiceDeployed() {
   return serviceResp.deploy_state === "DEPLOYED" ? true : false;
 }
 
-async function deployStudioFlow() {
+async function deployStudioFlow(configuration) {
   const flowResp = await fetch('/installer/deploy-studio-flow', {
-    method: "GET",
+    method: "POST",
     headers: {
       "Content-Type": "application/json",
       "Accept": 'application/json',
     },
+    body: JSON.stringify({ configuration: configuration }),
   })
   .then(resp => resp.json())
   .catch(err => console.log(err));

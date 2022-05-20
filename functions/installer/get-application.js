@@ -19,7 +19,19 @@ exports.handler = async function (context, event, callback) {
     }
 
     const phoneList = await client.api.accounts(context.ACCOUNT_SID).incomingPhoneNumbers.list();
-    const phones = phoneList.map(phone => {
+    const twilioFlowId = await getParam(context, 'TWILIO_FLOW_SID');
+
+
+    // Check in sms url whether deployed studio flow id is present or not. Then take that phone number else check for numbers where phone.capabilites.sms === true and phone.smsUrl is empty.
+    let phoneNumbers = phoneList.filter((phone) => phone.smsUrl.includes(twilioFlowId));
+
+    if(!phoneNumbers.length) {
+      phoneNumbers = phoneList.filter((phone) => phone.capabilities.sms && !phone.smsUrl);
+    }
+
+    console.log(phoneNumbers);
+
+    const phones = phoneNumbers.map(phone => {
       return {
         friendlyName: phone.friendlyName,
         phoneNumber: phone.phoneNumber,

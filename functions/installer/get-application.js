@@ -98,12 +98,15 @@ async function readConfigurationVariables() {
 
   console.log("Selected number...", phoneNumber);
 
-  const createdPhoneNumber = await client.incomingPhoneNumbers.create({
-    phoneNumber,
-    capabilities: {
-      sms: true,
-    },
-  });
-
-  return [createdPhoneNumber];
+  try {
+    const createdPhoneNumber = await client.incomingPhoneNumbers.create({
+      phoneNumber,
+      capabilities: {
+        sms: true,
+      },
+    });
+    return [createdPhoneNumber];
+  } catch {
+    return [];
+  }
 };

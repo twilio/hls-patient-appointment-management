@@ -19,7 +19,7 @@ exports.handler = async function (context, event, callback) {
     }
 
     const phoneList = await client.api.accounts(context.ACCOUNT_SID).incomingPhoneNumbers.list();
-    const twilioFlowId = await getParam(context, 'TWILIO_FLOW_SID');
+    const twilioFlowId = await getParam(context, 'FLOW_SID');
 
 
     // Check in sms url whether deployed studio flow id is present or not. Then take that phone number else check for numbers where phone.capabilites.sms === true and phone.smsUrl is empty.
@@ -66,7 +66,7 @@ exports.handler = async function (context, event, callback) {
 }
 
 async function readConfigurationVariables() {
-  const path_env = path.join(process.cwd(), '.env.example');
+  const path_env = path.join(process.cwd(), '.env');
   const payload = fs.readFileSync(path_env, 'utf8');
   const configuration = configure_env.parser.parse(payload)
   return configuration.variables;

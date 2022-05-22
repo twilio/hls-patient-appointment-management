@@ -1,9 +1,9 @@
 #!/bin/zsh
 set -e
 
-if [[ -z ${TWILIO_ACCOUNT_SID} ]]; then echo 'TWILIO_ACCOUNT_SID unset!'; exit 1; fi
-if [[ -z ${TWILIO_AUTH_TOKEN} ]];  then echo 'TWILIO_AUTH_TOKEN unset!'; exit 1; fi
-AUTHENTICATION="${TWILIO_ACCOUNT_SID}:${TWILIO_AUTH_TOKEN}"
+if [[ -z ${ACCOUNT_SID} ]]; then echo 'ACCOUNT_SID unset!'; exit 1; fi
+if [[ -z ${AUTH_TOKEN} ]];  then echo 'AUTH_TOKEN unset!'; exit 1; fi
+AUTHENTICATION="${ACCOUNT_SID}:${AUTH_TOKEN}"
 
 # ---------- retrieve service sid
 SERVICE_UNIQUE_NAME='patient-appointment-management'

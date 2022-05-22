@@ -168,13 +168,13 @@ async function listParameters(context) {
     ),
     REMINDER_FIRST_TIMING: await getParam(context, 'REMINDER_FIRST_TIMING'),
     REMINDER_SECOND_TIMING: await getParam(context, 'REMINDER_SECOND_TIMING'),
-    TWILIO_ENVIRONMENT_SID: await getParam(context, 'TWILIO_ENVIRONMENT_SID'),
-    TWILIO_ENVIRONMENT_DOMAIN_NAME: await getParam(
+    ENVIRONMENT_SID: await getParam(context, 'ENVIRONMENT_SID'),
+    ENVIRONMENT_DOMAIN_NAME: await getParam(
       context,
-      'TWILIO_ENVIRONMENT_DOMAIN_NAME'
+      'ENVIRONMENT_DOMAIN_NAME'
     ),
-    TWILIO_FLOW_SID: await getParam(context, 'TWILIO_FLOW_SID'),
-    TWILIO_SERVICE_SID: await getParam(context, 'TWILIO_SERVICE_SID'),
+    FLOW_SID: await getParam(context, 'FLOW_SID'),
+    SERVICE_SID: await getParam(context, 'SERVICE_SID'),
     TWILIO_PHONE_NUMBER: await getParam(context, 'TWILIO_PHONE_NUMBER'),
   };
 }

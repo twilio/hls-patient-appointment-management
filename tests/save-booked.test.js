@@ -10,7 +10,7 @@ const context = {
   AWS_REGION: 'us-west-2',
   AWS_S3_BUCKET: 'twilio-patient-appointment-management-owlhealth',
   FILENAME_APPOINTMENT: 'appointment{appointment_id}-patient{patient_id}.json',
-  TWILIO_FLOW_SID: 'YourStudioFlowSID',
+  FLOW_SID: 'YourStudioFlowSID',
 };
 
 // --------------------------------------------------------------------------------
@@ -85,7 +85,7 @@ test('normal flow of events', async () => {
   const expected_response = {
     code: 200,
     event_type: 'BOOKED',
-    appointment_s3key: `state/flow=${context.TWILIO_FLOW_SID}/disposition=QUEUED/appointment2000-patient1000.json`,
+    appointment_s3key: `state/flow=${context.FLOW_SID}/disposition=QUEUED/appointment2000-patient1000.json`,
   };
   expect(callback).toHaveBeenCalledWith(null, expected_response);
 });

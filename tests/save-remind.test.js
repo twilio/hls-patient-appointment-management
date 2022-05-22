@@ -9,7 +9,7 @@ const context = {
   AWS_REGION: 'us-west-2',
   AWS_S3_BUCKET: 'twilio-patient-appointment-management-owlhealth',
   FILENAME_APPOINTMENT: 'appointment{appointment_id}-patient{patient_id}.json',
-  TWILIO_FLOW_SID: 'YourStudioFlowSID',
+  FLOW_SID: 'YourStudioFlowSID',
 };
 
 // --------------------------------------------------------------------------------
@@ -106,7 +106,7 @@ test('normal flow of event: 1st reminder', async () => {
   const expected_response = {
     code: 200,
     event_type: 'REMIND',
-    appointment_s3key: `state/flow=${context.TWILIO_FLOW_SID}/disposition=REMINDED-1/appointment2000-patient1000.json`,
+    appointment_s3key: `state/flow=${context.FLOW_SID}/disposition=REMINDED-1/appointment2000-patient1000.json`,
   };
   expect(callback).toHaveBeenCalledWith(null, expected_response);
 });
@@ -170,7 +170,7 @@ test('normal flow of event: 2nd reminder', async () => {
   const expected_response = {
     code: 200,
     event_type: 'REMIND',
-    appointment_s3key: `state/flow=${context.TWILIO_FLOW_SID}/disposition=REMINDED-2/appointment2000-patient1000.json`,
+    appointment_s3key: `state/flow=${context.FLOW_SID}/disposition=REMINDED-2/appointment2000-patient1000.json`,
   };
   expect(callback).toHaveBeenCalledWith(null, expected_response);
 });
@@ -234,7 +234,7 @@ test('abnormal flow of event: MAX_REMINDERS_REACHED', async () => {
   const expected_response = {
     error: 'MAX_REMINDERS_REACHED',
     event_type: 'REMIND',
-    appointment_s3key: `state/flow=${context.TWILIO_FLOW_SID}/disposition=REMINDED-2/appointment2000-patient1000.json`,
+    appointment_s3key: `state/flow=${context.FLOW_SID}/disposition=REMINDED-2/appointment2000-patient1000.json`,
   };
   expect(callback).toHaveBeenCalledWith(expected_response);
 });

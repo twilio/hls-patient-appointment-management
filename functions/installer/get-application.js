@@ -82,11 +82,13 @@ async function readConfigurationVariables() {
  async function createTwilioPhoneNumber (context) {
   const client = context.getTwilioClient();
 
-  console.log("Buying a new number....");
+  // If country code not present default to US
+  const countryCode = context.COUNTRY_CODE || "US";
+  console.log("Buying a new number....", countryCode);
 
   const phoneNumbers = await client
-    .availablePhoneNumbers("US")
-    .local.list({ areaCode: 510, limit: 1 });
+    .availablePhoneNumbers(countryCode)
+    .local.list({ limit: 1 });
 
   console.log("Available numbers....", phoneNumbers);
 

@@ -34,6 +34,10 @@ exports.handler = async function (context, event, callback) {
       phoneNumbers = await createTwilioPhoneNumber(context)
     }
 
+    if(!phoneNumbers.length) {
+      throw new Error("Unable to get phone number");
+    }
+
     const phones = phoneNumbers.map(phone => {
       return {
         friendlyName: phone.friendlyName,
@@ -86,21 +90,21 @@ async function readConfigurationVariables() {
   const countryCode = context.COUNTRY_CODE || "US";
   console.log("Buying a new number....", countryCode);
 
-  const phoneNumbers = await client
-    .availablePhoneNumbers(countryCode)
-    .local.list({ limit: 1 });
-
-  console.log("Available numbers....", phoneNumbers);
-
-  if (!phoneNumbers.length) {
-    return [];
-  }
-
-  const { phoneNumber } = phoneNumbers[0];
-
-  console.log("Selected number...", phoneNumber);
-
   try {
+    const phoneNumbers = await client
+      .availablePhoneNumbers(countryCode)
+      .local.list({ limit: 1 });
+
+    console.log("Available numbers....", phoneNumbers);
+
+    if (!phoneNumbers.length) {
+      return [];
+    }
+
+    const { phoneNumber } = phoneNumbers[0];
+
+    console.log("Selected number...", phoneNumber);
+
     const createdPhoneNumber = await client.incomingPhoneNumbers.create({
       phoneNumber,
       capabilities: {

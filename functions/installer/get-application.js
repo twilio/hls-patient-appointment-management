@@ -19,7 +19,26 @@ exports.handler = async function (context, event, callback) {
     }
 
     const phoneList = await client.api.accounts(context.ACCOUNT_SID).incomingPhoneNumbers.list();
-    const phones = phoneList.map(phone => {
+    const twilioFlowId = await getParam(context, 'FLOW_SID');
+
+
+    // Check in sms url whether deployed studio flow id is present or not. Then take that phone number else check for numbers where phone.capabilites.sms === true and phone.smsUrl is empty.
+    let phoneNumbers = phoneList.filter((phone) => phone.smsUrl.includes(twilioFlowId));
+
+    if(!phoneNumbers.length) {
+      phoneNumbers = phoneList.filter((phone) => phone.capabilities.sms && !phone.smsUrl);
+    }
+
+    // If there is no phone numbers with sms capabilities, create a new one with sms capability.
+    if(!phoneNumbers.length) {
+      phoneNumbers = await createTwilioPhoneNumber(context)
+    }
+
+    if(!phoneNumbers.length) {
+      throw new Error("Unable to get phone number");
+    }
+
+    const phones = phoneNumbers.map(phone => {
       return {
         friendlyName: phone.friendlyName,
         phoneNumber: phone.phoneNumber,
@@ -51,8 +70,49 @@ exports.handler = async function (context, event, callback) {
 }
 
 async function readConfigurationVariables() {
-  const path_env = path.join(process.cwd(), '.env.example');
+  const path_env = path.join(process.cwd(), '.env');
   const payload = fs.readFileSync(path_env, 'utf8');
   const configuration = configure_env.parser.parse(payload)
   return configuration.variables;
 }
+
+
+/**
+ * Create a new phone number and returns it
+ * @param {*} context
+ * @returns
+ */
+
+ async function createTwilioPhoneNumber (context) {
+  const client = context.getTwilioClient();
+
+  // If country code not present default to US
+  const countryCode = context.COUNTRY_CODE || "US";
+  console.log("Buying a new number....", countryCode);
+
+  try {
+    const phoneNumbers = await client
+      .availablePhoneNumbers(countryCode)
+      .local.list({ limit: 1 });
+
+    console.log("Available numbers....", phoneNumbers);
+
+    if (!phoneNumbers.length) {
+      return [];
+    }
+
+    const { phoneNumber } = phoneNumbers[0];
+
+    console.log("Selected number...", phoneNumber);
+
+    const createdPhoneNumber = await client.incomingPhoneNumbers.create({
+      phoneNumber,
+      capabilities: {
+        sms: true,
+      },
+    });
+    return [createdPhoneNumber];
+  } catch {
+    return [];
+  }
+};

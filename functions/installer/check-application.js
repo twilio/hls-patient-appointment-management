@@ -29,8 +29,8 @@ exports.handler = async function (context, event, callback) {
   try {
 
     const application_name   = await getParam(context, 'APPLICATION_NAME');
-    const service_sid        = await getParam(context, 'TWILIO_SERVICE_SID');
-    const environment_domain = service_sid ? await getParam(context, 'TWILIO_ENVIRONMENT_DOMAIN_NAME') : null;
+    const service_sid        = await getParam(context, 'SERVICE_SID');
+    const environment_domain = service_sid ? await getParam(context, 'ENVIRONMENT_DOMAIN_NAME') : null;
     const application_url    = service_sid
       ? `https://${environment_domain}`
       : ""; // relative url when on localhost and serice is not yet deployed

@@ -62,7 +62,7 @@ async function executeFlow(params) {
   const options = {
     hostname: 'studio.twilio.com',
     port: 443,
-    path: `/v2/Flows/${params.twilio_flow_sid}/Executions`,
+    path: `/v2/Flows/${params.flow_sid}/Executions`,
     method: 'POST',
     headers: {
       Authorization:
@@ -118,7 +118,7 @@ exports.handler = async function (event, context) {
     const FILENAME_APPOINTMENT = process.env.FILENAME_APPOINTMENT;
     const ACCOUNT_SID = secret.ACCOUNT_SID;
     const AUTH_TOKEN = secret.AUTH_TOKEN;
-    const TWILIO_FLOW_SID = process.env.TWILIO_FLOW_SID;
+    const FLOW_SID = process.env.FLOW_SID;
     const TWILIO_PHONE_NUMBER = process.env.TWILIO_PHONE_NUMBER;
     const REMINDER_OUTREACH_START = process.env.REMINDER_OUTREACH_START;
     const REMINDER_OUTREACH_FINISH = process.env.REMINDER_OUTREACH_FINISH;
@@ -148,7 +148,7 @@ exports.handler = async function (event, context) {
       Bucket: AWS_S3_BUCKET,
       Prefix: [
         'state',
-        `flow=${TWILIO_FLOW_SID}`,
+        `flow=${FLOW_SID}`,
         'disposition=QUEUED',
         '',
       ].join('/'),
@@ -159,7 +159,7 @@ exports.handler = async function (event, context) {
       Bucket: AWS_S3_BUCKET,
       Prefix: [
         'state',
-        `flow=${TWILIO_FLOW_SID}`,
+        `flow=${FLOW_SID}`,
         'disposition=REMINDED-1',
         '',
       ].join('/'),
@@ -311,7 +311,7 @@ exports.handler = async function (event, context) {
           appointment.appointment_id
         );
         const params = {
-          twilio_flow_sid: TWILIO_FLOW_SID,
+          flow_sid: FLOW_SID,
           twilio_account_sid: ACCOUNT_SID,
           twilio_auth_token: AUTH_TOKEN,
           to_number: appointment.patient_phone,

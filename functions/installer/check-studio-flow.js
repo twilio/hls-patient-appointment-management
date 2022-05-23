@@ -28,10 +28,10 @@ exports.handler = async function (context, event, callback) {
   response.setStatusCode(200);
 
   try {
-    // TWILIO_FLOW_SID will be 'null' if associated flow is not found
-    const TWILIO_FLOW_SID = await getParam(context, 'TWILIO_FLOW_SID');
+    // FLOW_SID will be 'null' if associated flow is not found
+    const FLOW_SID = await getParam(context, 'FLOW_SID');
     const APPLICATION_NAME = await getParam(context, 'APPLICATION_NAME');
-    if (!TWILIO_FLOW_SID) {
+    if (!FLOW_SID) {
       response.setBody({status: 'NOT-DEPLOYED'});
       return callback(null, response);
     }
@@ -39,7 +39,7 @@ exports.handler = async function (context, event, callback) {
       .list({ limit: 100 })
       .then(flows => flows);
     const pamFlow = flows.find(
-      flow => flow.friendlyName === APPLICATION_NAME && flow.sid === TWILIO_FLOW_SID
+      flow => flow.friendlyName === APPLICATION_NAME && flow.sid === FLOW_SID
     );
 		if (!pamFlow) {
 			response.setBody({status: 'NOT-DEPLOYED'});

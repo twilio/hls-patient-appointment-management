@@ -7,7 +7,7 @@ const ts = Math.round(new Date().getTime() / 1000);
 const tsTomorrow = ts + 17 * 3600;
 
 async function createAppointment(context, appointment) {
-  context.TWILIO_FLOW_SID = await getParam(context, 'TWILIO_FLOW_SID');
+  context.FLOW_SID = await getParam(context, 'FLOW_SID');
 
   // ---------- execute flow
   const now = new Date();
@@ -17,11 +17,11 @@ async function createAppointment(context, appointment) {
     from: context.TWILIO_PHONE_NUMBER,
     parameters: appointment,
   };
-  console.log(appointment)
+  
   try {
     const response = await context
       .getTwilioClient()
-      .studio.flows(context.TWILIO_FLOW_SID)
+      .studio.flows(context.FLOW_SID)
       .executions.create(params);
     const executionSid = response.sid;
   }

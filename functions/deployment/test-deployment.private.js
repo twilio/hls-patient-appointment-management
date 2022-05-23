@@ -170,7 +170,7 @@ async function clearAppointmentData(context, bucket) {
  * test studio flow using specified appointment data
  *
  * parameters
- *   . context: contains S3, TWILIO_FLOW_SID, AWS_S3_BUCKET
+ *   . context: contains S3, FLOW_SID, AWS_S3_BUCKET
  *   . appointment: appointment event data to run test
  *   . expected: expected results {
  *       step: last flow execution step
@@ -195,7 +195,7 @@ async function testFlow(context, appointment, expected) {
   };
   let response = await context
     .getTwilioClient()
-    .studio.flows(context.TWILIO_FLOW_SID)
+    .studio.flows(context.FLOW_SID)
     .executions.create(params);
   const execution_sid = response.sid;
 
@@ -205,14 +205,14 @@ async function testFlow(context, appointment, expected) {
   // ---------- if still active, stop flow
   response = await context
     .getTwilioClient()
-    .studio.flows(context.TWILIO_FLOW_SID)
+    .studio.flows(context.FLOW_SID)
     .executions(execution_sid)
     .fetch();
   if (response.status === 'active') {
     // if 'active' wait 10 secs and stop flow execution
     await context
       .getTwilioClient()
-      .studio.flows(context.TWILIO_FLOW_SID)
+      .studio.flows(context.FLOW_SID)
       .executions(execution_sid)
       .update({ status: 'ended' });
   }
@@ -220,14 +220,14 @@ async function testFlow(context, appointment, expected) {
   // ---------- retrieve flow execution last step
   const steps = await context
     .getTwilioClient()
-    .studio.flows(context.TWILIO_FLOW_SID)
+    .studio.flows(context.FLOW_SID)
     .executions(execution_sid)
     .steps.list({ limit: 1 });
 
   // ---------- count appointment files in history
   params = {
     Bucket: context.AWS_S3_BUCKET,
-    Prefix: `history/flow=${context.TWILIO_FLOW_SID}`,
+    Prefix: `history/flow=${context.FLOW_SID}`,
   };
   const n = await countObjects(context, params);
 
@@ -239,7 +239,7 @@ async function testFlow(context, appointment, expected) {
 
   params = {
     Bucket: context.AWS_S3_BUCKET,
-    Prefix: `state/flow=${context.TWILIO_FLOW_SID}`,
+    Prefix: `state/flow=${context.FLOW_SID}`,
   };
   const key = await findObject(context, params, filename);
 
@@ -281,7 +281,7 @@ async function testFlow(context, appointment, expected) {
  * test send appointment reminder
  *
  * parameters
- *   . context: contains LAMBDA, AWS_LAMBDA_SEND_REMINDERS, TWILIO_FLOW_SID, S3, AWS_S3_BUCKET
+ *   . context: contains LAMBDA, AWS_LAMBDA_SEND_REMINDERS, FLOW_SID, S3, AWS_S3_BUCKET
  *   . appointment: appointment event data to run test
  *   . expected: expected results {
  *       step: last flow execution step
@@ -309,21 +309,21 @@ async function testReminder(context, appointment, expected) {
   // ---------- retrieve last flow execution
   const executions = await context
     .getTwilioClient()
-    .studio.flows(context.TWILIO_FLOW_SID)
+    .studio.flows(context.FLOW_SID)
     .executions.list({ limit: 1 });
   const execution_sid = executions[0].sid;
 
   // ---------- if still active, stop flow
   response = await context
     .getTwilioClient()
-    .studio.flows(context.TWILIO_FLOW_SID)
+    .studio.flows(context.FLOW_SID)
     .executions(execution_sid)
     .fetch();
   if (response.status === 'active') {
     // if 'active' wait 10 secs and stop flow execution
     await context
       .getTwilioClient()
-      .studio.flows(context.TWILIO_FLOW_SID)
+      .studio.flows(context.FLOW_SID)
       .executions(execution_sid)
       .update({ status: 'ended' });
   }
@@ -331,14 +331,14 @@ async function testReminder(context, appointment, expected) {
   // ---------- retrieve flow execution last step
   const steps = await context
     .getTwilioClient()
-    .studio.flows(context.TWILIO_FLOW_SID)
+    .studio.flows(context.FLOW_SID)
     .executions(execution_sid)
     .steps.list({ limit: 1 });
 
   // ---------- count appointment files in history
   params = {
     Bucket: context.AWS_S3_BUCKET,
-    Prefix: `history/flow=${context.TWILIO_FLOW_SID}`,
+    Prefix: `history/flow=${context.FLOW_SID}`,
   };
   const n = await countObjects(context, params);
 
@@ -350,7 +350,7 @@ async function testReminder(context, appointment, expected) {
 
   params = {
     Bucket: context.AWS_S3_BUCKET,
-    Prefix: `state/flow=${context.TWILIO_FLOW_SID}`,
+    Prefix: `state/flow=${context.FLOW_SID}`,
   };
   const key = await findObject(context, params, filename);
 
@@ -428,7 +428,7 @@ async function testEHR2TwilioSMS(context, test_phone_number) {
           transitionedFrom: 'save-booked',
           transitionTo: 'send_booked',
         },
-        key: `state/flow=${context.TWILIO_FLOW_SID}/disposition=QUEUED/appointment${appt.appointment_id}-patient${appt.patient_id}.json`,
+        key: `state/flow=${context.FLOW_SID}/disposition=QUEUED/appointment${appt.appointment_id}-patient${appt.patient_id}.json`,
         n: 1,
         appointment: { event_type: 'BOOKED' },
       },
@@ -442,7 +442,7 @@ async function testEHR2TwilioSMS(context, test_phone_number) {
           transitionedFrom: 'send_canceled',
           transitionTo: 'Ended',
         },
-        key: `state/flow=${context.TWILIO_FLOW_SID}/disposition=QUEUED/appointment${appt.appointment_id}-patient${appt.patient_id}.json`,
+        key: `state/flow=${context.FLOW_SID}/disposition=QUEUED/appointment${appt.appointment_id}-patient${appt.patient_id}.json`,
         n: 2,
         appointment: { event_type: 'CANCELED' },
       },
@@ -456,7 +456,7 @@ async function testEHR2TwilioSMS(context, test_phone_number) {
           transitionedFrom: 'send_confirmed',
           transitionTo: 'Ended',
         },
-        key: `state/flow=${context.TWILIO_FLOW_SID}/disposition=QUEUED/appointment${appt.appointment_id}-patient${appt.patient_id}.json`,
+        key: `state/flow=${context.FLOW_SID}/disposition=QUEUED/appointment${appt.appointment_id}-patient${appt.patient_id}.json`,
         n: 3,
         appointment: { event_type: 'CONFIRMED' },
       },
@@ -470,7 +470,7 @@ async function testEHR2TwilioSMS(context, test_phone_number) {
           transitionedFrom: 'send_modified',
           transitionTo: 'Ended',
         },
-        key: `state/flow=${context.TWILIO_FLOW_SID}/disposition=QUEUED/appointment${appt.appointment_id}-patient${appt.patient_id}.json`,
+        key: `state/flow=${context.FLOW_SID}/disposition=QUEUED/appointment${appt.appointment_id}-patient${appt.patient_id}.json`,
         n: 4,
         appointment: { event_type: 'MODIFIED' },
       },
@@ -484,7 +484,7 @@ async function testEHR2TwilioSMS(context, test_phone_number) {
           transitionedFrom: 'send_noshowed',
           transitionTo: 'Ended',
         },
-        key: `state/flow=${context.TWILIO_FLOW_SID}/disposition=QUEUED/appointment${appt.appointment_id}-patient${appt.patient_id}.json`,
+        key: `state/flow=${context.FLOW_SID}/disposition=QUEUED/appointment${appt.appointment_id}-patient${appt.patient_id}.json`,
         n: 5,
         appointment: { event_type: 'NOSHOWED' },
       },
@@ -498,7 +498,7 @@ async function testEHR2TwilioSMS(context, test_phone_number) {
           transitionedFrom: 'send_rescheduled',
           transitionTo: 'Ended',
         },
-        key: `state/flow=${context.TWILIO_FLOW_SID}/disposition=QUEUED/appointment${appt.appointment_id}-patient${appt.patient_id}.json`,
+        key: `state/flow=${context.FLOW_SID}/disposition=QUEUED/appointment${appt.appointment_id}-patient${appt.patient_id}.json`,
         n: 6,
         appointment: { event_type: 'RESCHEDULED' },
       },
@@ -561,7 +561,7 @@ async function testReminderTwoReminders(context, test_phone_number) {
           transitionedFrom: 'save-booked',
           transitionTo: 'send_booked',
         },
-        key: `state/flow=${context.TWILIO_FLOW_SID}/disposition=QUEUED/appointment${appt.appointment_id}-patient${appt.patient_id}.json`,
+        key: `state/flow=${context.FLOW_SID}/disposition=QUEUED/appointment${appt.appointment_id}-patient${appt.patient_id}.json`,
         n: 1,
         appointment: { event_type: 'BOOKED' },
       },
@@ -574,7 +574,7 @@ async function testReminderTwoReminders(context, test_phone_number) {
           transitionedFrom: 'save-remind',
           transitionTo: 'send_remind',
         },
-        key: `state/flow=${context.TWILIO_FLOW_SID}/disposition=REMINDED-1/appointment${appt.appointment_id}-patient${appt.patient_id}.json`,
+        key: `state/flow=${context.FLOW_SID}/disposition=REMINDED-1/appointment${appt.appointment_id}-patient${appt.patient_id}.json`,
         n: 2,
         appointment: { event_type: 'REMIND' },
       },
@@ -587,7 +587,7 @@ async function testReminderTwoReminders(context, test_phone_number) {
           transitionedFrom: 'save-remind',
           transitionTo: 'send_remind',
         },
-        key: `state/flow=${context.TWILIO_FLOW_SID}/disposition=REMINDED-2/appointment${appt.appointment_id}-patient${appt.patient_id}.json`,
+        key: `state/flow=${context.FLOW_SID}/disposition=REMINDED-2/appointment${appt.appointment_id}-patient${appt.patient_id}.json`,
         n: 3,
         appointment: { event_type: 'REMIND' },
       },
@@ -600,7 +600,7 @@ async function testReminderTwoReminders(context, test_phone_number) {
           transitionedFrom: 'save-remind',
           transitionTo: 'send_remind',
         },
-        key: `state/flow=${context.TWILIO_FLOW_SID}/disposition=REMINDED-2/appointment${appt.appointment_id}-patient${appt.patient_id}.json`,
+        key: `state/flow=${context.FLOW_SID}/disposition=REMINDED-2/appointment${appt.appointment_id}-patient${appt.patient_id}.json`,
         n: 3,
         appointment: { event_type: 'REMIND' },
       },
@@ -665,7 +665,7 @@ async function testReminderNoReminder(context, test_phone_number) {
           transitionedFrom: 'save-booked',
           transitionTo: 'send_booked',
         },
-        key: `state/flow=${context.TWILIO_FLOW_SID}/disposition=QUEUED/appointment${appt.appointment_id}-patient${appt.patient_id}.json`,
+        key: `state/flow=${context.FLOW_SID}/disposition=QUEUED/appointment${appt.appointment_id}-patient${appt.patient_id}.json`,
         n: 1,
         appointment: { event_type: 'BOOKED' },
       },
@@ -678,7 +678,7 @@ async function testReminderNoReminder(context, test_phone_number) {
           transitionedFrom: 'save-booked',
           transitionTo: 'send_booked',
         },
-        key: `state/flow=${context.TWILIO_FLOW_SID}/disposition=QUEUED/appointment${appt.appointment_id}-patient${appt.patient_id}.json`,
+        key: `state/flow=${context.FLOW_SID}/disposition=QUEUED/appointment${appt.appointment_id}-patient${appt.patient_id}.json`,
         n: 1,
         appointment: { event_type: 'BOOKED' },
       },
@@ -743,7 +743,7 @@ async function testReminderExpiration(context, test_phone_number) {
           transitionedFrom: 'save-booked',
           transitionTo: 'send_booked',
         },
-        key: `state/flow=${context.TWILIO_FLOW_SID}/disposition=QUEUED/appointment${appt.appointment_id}-patient${appt.patient_id}.json`,
+        key: `state/flow=${context.FLOW_SID}/disposition=QUEUED/appointment${appt.appointment_id}-patient${appt.patient_id}.json`,
         n: 1,
         appointment: { event_type: 'BOOKED' },
       },
@@ -756,7 +756,7 @@ async function testReminderExpiration(context, test_phone_number) {
           transitionedFrom: 'save-booked',
           transitionTo: 'send_booked',
         },
-        key: `state/flow=${context.TWILIO_FLOW_SID}/disposition=EXPIRED/appointment${appt.appointment_id}-patient${appt.patient_id}.json`,
+        key: `state/flow=${context.FLOW_SID}/disposition=EXPIRED/appointment${appt.appointment_id}-patient${appt.patient_id}.json`,
         n: 2,
         appointment: { event_type: 'EXPIRE' },
       },
@@ -803,19 +803,19 @@ exports.handler = async function (context, event, callback) {
       'AWS_LAMBDA_SEND_REMINDERS'
     );
     context.AWS_S3_BUCKET = await getParam(context, 'AWS_S3_BUCKET');
-    context.TWILIO_FLOW_SID = await getParam(context, 'TWILIO_FLOW_SID');
+    context.FLOW_SID = await getParam(context, 'FLOW_SID');
     context.FILENAME_APPOINTMENT = await getParam(
       context,
       'FILENAME_APPOINTMENT'
     );
 
     // studio flow
-    if (context.TWILIO_FLOW_SID === null) {
+    if (context.FLOW_SID === null) {
       const err = 'studio flow not deployed!';
       console.log(err);
       throw new Error(err);
     } else {
-      console.log('found studio flow:', context.TWILIO_FLOW_SID);
+      console.log('found studio flow:', context.FLOW_SID);
     }
 
     const cf = new AWS.CloudFormation(AWS_CONFIG);

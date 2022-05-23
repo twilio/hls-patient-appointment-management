@@ -5,12 +5,12 @@ exports.handler = function (context, event, callback) {
   async function sendMfaCode(context) {
     const path0 = Runtime.getFunctions().helpers.path;
     const { getParam } = require(path0);
-    context.TWILIO_VERIFY_SID = await getParam(context, 'TWILIO_VERIFY_SID');
+    context.VERIFY_SID = await getParam(context, 'VERIFY_SID');
 
     const twilioClient = context.getTwilioClient();
     const channel = 'sms';
     return twilioClient.verify
-      .services(context.TWILIO_VERIFY_SID)
+      .services(context.VERIFY_SID)
       .verifications.create({
         to: context.ADMINISTRATOR_PHONE,
         channel,

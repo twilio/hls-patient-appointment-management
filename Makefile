@@ -4,10 +4,10 @@
 
 # ---------- check twilio credentials from environment variables
 # when below 2 variables are set, it will be the 'active' profile of twilio cli
-ifndef TWILIO_ACCOUNT_SID
+ifndef ACCOUNT_SID
 $(info Lookup your "ACCOUNT SID" at https://console.twilio.com/)
-$(info execute in your terminal, 'export TWILIO_ACCOUNT_SID=AC********************************')
-$(error TWILIO_ACCOUNT_SID environment variable is not set)
+$(info execute in your terminal, 'export ACCOUNT_SID=AC********************************')
+$(error ACCOUNT_SID environment variable is not set)
 endif
 
 ifndef TWILIO_AUTH_TOKEN
@@ -31,8 +31,8 @@ $(info GIT_REPO_URL       : $(GIT_REPO_URL))
 $(info INSTALLER_NAME     : $(INSTALLER_NAME))
 $(info CPU_HARDWARE       : $(shell uname -m))
 $(info DOCKER_EMULATION   : $(DOCKER_EMULATION))
-$(info TWILIO_ACCOUNT_NAME: $(shell twilio api:core:accounts:fetch --sid=$(TWILIO_ACCOUNT_SID) --no-header --properties=friendlyName))
-$(info TWILIO_ACCOUNT_SID : $(TWILIO_ACCOUNT_SID))
+$(info TWILIO_ACCOUNT_NAME: $(shell twilio api:core:accounts:fetch --sid=$(ACCOUNT_SID) --no-header --properties=friendlyName))
+$(info ACCOUNT_SID : $(ACCOUNT_SID))
 $(info TWILIO_AUTH_TOKEN  : $(shell echo $(TWILIO_AUTH_TOKEN) | sed 's/./*/g'))
 $(info SERVICE_UNAME      : $(SERVICE_UNAME))
 $(info VERIFY_FNAME       : $(VERIFY_FNAME))
@@ -54,7 +54,7 @@ installer-build-local:
 
 installer-run:
 	docker run --name $(INSTALLER_NAME) --rm --publish 3000:3000 $(DOCKER_EMULATION) \
-	--env ACCOUNT_SID=$(TWILIO_ACCOUNT_SID) --env AUTH_TOKEN=$(TWILIO_AUTH_TOKEN) \
+	--env ACCOUNT_SID=$(ACCOUNT_SID) --env AUTH_TOKEN=$(TWILIO_AUTH_TOKEN) \
 	--interactive --tty $(INSTALLER_NAME)
 
 

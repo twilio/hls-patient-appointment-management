@@ -122,7 +122,7 @@ async function deployService(context, envrionmentVariables = {}) {
   console.log('deployOptions.env:', deployOptions.env);
 
   context['APPLICATION_NAME'] = envrionmentVariables.APPLICATION_NAME;
-  let service_sid = await getParam(context, 'TWILIO_SERVICE_SID');
+  let service_sid = await getParam(context, 'SERVICE_SID');
   if (service_sid) {
     // update service
     console.log('updating services ...');
@@ -143,7 +143,7 @@ async function deployService(context, envrionmentVariables = {}) {
   });
 
   await serverlessClient.deployProject(deployOptions);
-  service_sid = await getParam(context, 'TWILIO_SERVICE_SID');
+  service_sid = await getParam(context, 'SERVICE_SID');
 
   return service_sid;
 }

@@ -31,9 +31,9 @@ async function setParam(context, key, value) {
 
   const client = context.getTwilioClient();
   // eslint-disable-next-line no-use-before-define
-  const service_sid = await getParam(context, 'TWILIO_SERVICE_SID');
+  const service_sid = await getParam(context, 'SERVICE_SID');
   // eslint-disable-next-line no-use-before-define
-  const environment_sid = await getParam(context, 'TWILIO_ENVIRONMENT_SID');
+  const environment_sid = await getParam(context, 'ENVIRONMENT_SID');
 
   let variable_sid = null;
   await client.serverless
@@ -75,9 +75,9 @@ function assertLocalhost(context) {
  * - service environment (aka context)
  * - os for local development (via os.process)
  * - per resource-specific logic
- *   . TWILIO_SERVICE_SID from context, otherwise matching application name
- *   . TWILIO_ENVIRONMENT_SID from TWILIO_SERVICE_SID
- *   . TWILIO_ENVIRONMENT_DOMAIN_NAME from TWILIO_SERVICE_SID
+ *   . SERVICE_SID from context, otherwise matching application name
+ *   . ENVIRONMENT_SID from SERVICE_SID
+ *   . ENVIRONMENT_DOMAIN_NAME from SERVICE_SID
  * --------------------------------------------------------------------------------
  */
 async function getParam(context, key) {
@@ -113,14 +113,14 @@ async function getParam(context, key) {
   // ----------------------------------------------------------------------
   try {
     switch (key) {
-      case 'TWILIO_ACCOUNT_SID': {
+      case 'ACCOUNT_SID': {
         return getParam(context, 'ACCOUNT_SID');
       }
       case 'TWILIO_AUTH_TOKEN': {
         return getParam(context, 'AUTH_TOKEN');
       }
-      case 'TWILIO_ENVIRONMENT_SID': {
-        const service_sid = await getParam(context, 'TWILIO_SERVICE_SID');
+      case 'ENVIRONMENT_SID': {
+        const service_sid = await getParam(context, 'SERVICE_SID');
         if (service_sid === null) {
           return null; // service not yet deployed
         }
@@ -129,7 +129,7 @@ async function getParam(context, key) {
           .environments.list();
         return environments[0].sid;
       }
-      case 'TWILIO_MESSAGING_SID': {
+      case 'MESSAGING_SID': {
         const messagingServiceSid = await getParam(context, 'MESSAGING_SERVICE_SID');
         if (!messagingServiceSid) {
           return null; // messaging service is not up
@@ -139,13 +139,13 @@ async function getParam(context, key) {
           .then(services => services.find(service => service.friendlyName === THIS_APPLICATION_NAME));
         return messagingService.sid;
       }
-      case 'TWILIO_SERVICE_SID': {
+      case 'SERVICE_SID': {
         const services = await client.serverless.services.list();
         const service = services.find(async s => s.uniqueName === await getParam(context, 'APPLICATION_NAME'));
         return (service && service.sid) ? service.sid : null;
       }
-      case 'TWILIO_ENVIRONMENT_DOMAIN_NAME': {
-        const service_sid = await getParam(context, 'TWILIO_SERVICE_SID');
+      case 'ENVIRONMENT_DOMAIN_NAME': {
+        const service_sid = await getParam(context, 'SERVICE_SID');
         if (service_sid === null) {
           return null; // service not yet deployed
         }
@@ -154,7 +154,7 @@ async function getParam(context, key) {
           .environments.list();
         return environments[0].domainName;
       }
-      case 'TWILIO_FLOW_SID': {
+      case 'FLOW_SID': {
         let flow_sid = null;
         await client.studio.flows.list({ limit: 100 }).then((flows) =>
           flows.forEach((f) => {
@@ -165,24 +165,7 @@ async function getParam(context, key) {
         );
         return flow_sid;
       }
-      case 'TWILIO_SERVICE_SID': {
-        let service_sid = null;
-        await client.serverless.services.list({ limit: 100 }).then((services) =>
-          services.forEach((s) => {
-            if (s.friendlyName === THIS_APPLICATION_NAME) {
-              service_sid = s.sid;
-            }
-          })
-        );
-        if (service_sid !== null) {
-          return service_sid;
-        }
-        console.log(
-          'Developer note: YOU MUST DEPLOY THE SERVICE FIRST!!! ABORTING!!!'
-        );
-        return null;
-      }
-      case 'TWILIO_VERIFY_SID': {
+      case 'VERIFY_SID': {
         let verify_sid = null;
         await client.verify.services.list().then((services) => {
           services.forEach((s) => {

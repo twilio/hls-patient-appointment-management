@@ -423,14 +423,14 @@
             "value": "{{flow.flow_sid}}"
           }
         ],
-        "url": "https://YOUR_TWILIO_ENVIRONMENT_DOMAIN_NAME/message-booked",
-        "environment_sid": "YOUR_TWILIO_ENVIRONMENT_SID",
+        "url": "https://YOUR_ENVIRONMENT_DOMAIN_NAME/message-booked",
+        "environment_sid": "YOUR_ENVIRONMENT_SID",
         "offset": {
           "y": 980,
           "x": 550
         },
         "function_sid": "YOUR_FUNCTION_SID[message-booked]",
-        "service_sid": "YOUR_TWILIO_SERVICE_SID"
+        "service_sid": "YOUR_SERVICE_SID"
       }
     },
     {
@@ -456,14 +456,14 @@
             "value": "{{flow.flow_sid}}"
           }
         ],
-        "url": "https://YOUR_TWILIO_ENVIRONMENT_DOMAIN_NAME/message-canceled",
-        "environment_sid": "YOUR_TWILIO_ENVIRONMENT_SID",
+        "url": "https://YOUR_ENVIRONMENT_DOMAIN_NAME/message-canceled",
+        "environment_sid": "YOUR_ENVIRONMENT_SID",
         "offset": {
           "y": 930,
           "x": 870
         },
         "function_sid": "YOUR_FUNCTION_SID[message-canceled]",
-        "service_sid": "YOUR_TWILIO_SERVICE_SID"
+        "service_sid": "YOUR_SERVICE_SID"
       }
     },
     {
@@ -489,14 +489,14 @@
             "value": "{{flow.flow_sid}}"
           }
         ],
-        "url": "https://YOUR_TWILIO_ENVIRONMENT_DOMAIN_NAME/message-modified",
-        "environment_sid": "YOUR_TWILIO_ENVIRONMENT_SID",
+        "url": "https://YOUR_ENVIRONMENT_DOMAIN_NAME/message-modified",
+        "environment_sid": "YOUR_ENVIRONMENT_SID",
         "offset": {
           "y": 880,
           "x": 1190
         },
         "function_sid": "YOUR_FUNCTION_SID[message-modified]",
-        "service_sid": "YOUR_TWILIO_SERVICE_SID"
+        "service_sid": "YOUR_SERVICE_SID"
       }
     },
     {
@@ -522,14 +522,14 @@
             "value": "{{flow.flow_sid}}"
           }
         ],
-        "url": "https://YOUR_TWILIO_ENVIRONMENT_DOMAIN_NAME/message-noshowed",
-        "environment_sid": "YOUR_TWILIO_ENVIRONMENT_SID",
+        "url": "https://YOUR_ENVIRONMENT_DOMAIN_NAME/message-noshowed",
+        "environment_sid": "YOUR_ENVIRONMENT_SID",
         "offset": {
           "y": 820,
           "x": 1520
         },
         "function_sid": "YOUR_FUNCTION_SID[message-noshowed]",
-        "service_sid": "YOUR_TWILIO_SERVICE_SID"
+        "service_sid": "YOUR_SERVICE_SID"
       }
     },
     {
@@ -555,14 +555,14 @@
             "value": "{{flow.flow_sid}}"
           }
         ],
-        "url": "https://YOUR_TWILIO_ENVIRONMENT_DOMAIN_NAME/message-rescheduled",
-        "environment_sid": "YOUR_TWILIO_ENVIRONMENT_SID",
+        "url": "https://YOUR_ENVIRONMENT_DOMAIN_NAME/message-rescheduled",
+        "environment_sid": "YOUR_ENVIRONMENT_SID",
         "offset": {
           "y": 730,
           "x": 2170
         },
         "function_sid": "YOUR_FUNCTION_SID[message-confirmed]",
-        "service_sid": "YOUR_TWILIO_SERVICE_SID"
+        "service_sid": "YOUR_SERVICE_SID"
       }
     },
     {
@@ -611,14 +611,14 @@
             "value": "{{flow.flow_sid}}"
           }
         ],
-        "url": "https://YOUR_TWILIO_ENVIRONMENT_DOMAIN_NAME/message-remind",
-        "environment_sid": "YOUR_TWILIO_ENVIRONMENT_SID",
+        "url": "https://YOUR_ENVIRONMENT_DOMAIN_NAME/message-remind",
+        "environment_sid": "YOUR_ENVIRONMENT_SID",
         "offset": {
           "y": 770,
           "x": -140
         },
         "function_sid": "YOUR_FUNCTION_SID[message-remind]",
-        "service_sid": "YOUR_TWILIO_SERVICE_SID"
+        "service_sid": "YOUR_SERVICE_SID"
       }
     },
     {
@@ -765,14 +765,14 @@
             "value": "{{flow.data.appointment_datetime}}"
           }
         ],
-        "url": "https://YOUR_TWILIO_ENVIRONMENT_DOMAIN_NAME/get-datetime-parts",
-        "environment_sid": "YOUR_TWILIO_ENVIRONMENT_SID",
+        "url": "https://YOUR_ENVIRONMENT_DOMAIN_NAME/get-datetime-parts",
+        "environment_sid": "YOUR_ENVIRONMENT_SID",
         "offset": {
           "y": 220,
           "x": -140
         },
         "function_sid": "YOUR_FUNCTION_SID[get-datetime-parts]",
-        "service_sid": "YOUR_TWILIO_SERVICE_SID"
+        "service_sid": "YOUR_SERVICE_SID"
       }
     }
   ],

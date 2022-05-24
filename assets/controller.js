@@ -9,12 +9,7 @@ let flowSid;
 let userActive = true;
 let simRemindTimeout = 0;
 let currentEvent = null;
-
-const successMessages = (simRemindTimeout) => ({
-  BOOKED: `Your appointment request has been sent. Please wait ${simRemindTimeout} seconds to simulate a reminder.`,
-  MODIFIED: `Your appointment request has been modified`,
-  RESCHEDULED: `Your appointment request has been rescheduled`,
-});
+let countdownSim = $(".simulate-response-countdown");
 
 const baseUrl = new URL(location.href);
 baseUrl.pathname = baseUrl.pathname.replace(/\/index\.html$/, "");
@@ -23,20 +18,24 @@ delete baseUrl.search;
 const fullUrl = baseUrl.href.substr(0, baseUrl.href.length - 1);
 
 const EVENTTYPE = {
-  BOOKED: 'BOOKED',
-  CONFIRMED: 'CONFIRMED',
-  REMIND: 'REMIND',
-  CANCELED: 'CANCELED',
-  NOSHOWED: 'NOSHOWED'
+  BOOKED: "BOOKED",
+  CONFIRMED: "CONFIRMED",
+  REMIND: "REMIND",
+  CANCELED: "CANCELED",
+  NOSHOWED: "NOSHOWED",
+  MODIFIED: "MODIFIED",
+  RESCHEDULED: "RESCHEDULED",
 };
 
 const BUTTON = {
-  BOOKED: '#book_appointment_btn',
-  CONFIRMED: '#confirm_appointment_btn',
-  REMIND: '#remind_appointment_btn',
-  CANCELED: '#cancel_appointment_btn',
-  NOSHOWED: '#noshowed_appointment_btn'
-}
+  BOOKED: "#book_appointment_btn",
+  CONFIRMED: "#confirm_appointment_btn",
+  REMIND: "#remind_appointment_btn",
+  CANCELED: "#cancel_appointment_btn",
+  NOSHOWED: "#noshowed_appointment_btn",
+  MODIFIED: "#modify_appointment_btn",
+  RESCHEDULED: "#reschedule_appointment_btn",
+};
 
 window.addEventListener("load", async () => {
   $("#mfa-form").hide();
@@ -117,10 +116,9 @@ function triggerEvent(params) {
 async function updateAppointment(command) {
   THIS = "updateAppointment:";
   userActive = true;
-
   simResponse = $(".simulate-response");
 
-  $(BUTTON.BOOKED).addClass("loading");
+  $(BUTTON[command]).addClass("loading");
   simResponse.text("Please wait...").show();
 
   const patientName = $("#patient-name").val();
@@ -144,10 +142,11 @@ async function updateAppointment(command) {
       appointmentProvider,
       appointmentLocation,
     });
+    showSimSuccess(command);
   } catch {
     showSimReponseError("Unable to send your appointment request.");
   } finally {
-    $(BUTTON.BOOKED).removeClass("loading");
+    $(BUTTON[command]).removeClass("loading");
   }
 }
 
@@ -155,53 +154,39 @@ async function updateAppointment(command) {
 
 async function bookAppointment(e) {
   e.preventDefault();
-  currentEvent = "BOOKED";
+  currentEvent = EVENTTYPE.BOOKED;
   THIS = "bookAppointment:";
-  simResponse = $(".simulate-response");
-  $("#book_appointment_btn").addClass("loading");
-  simResponse.text("Please wait...").show();
   await updateAppointment(currentEvent);
+  // Show sim for count down
   simRemindTimeout = 120; // seconds
   setTimeout(updateSimRemindTimeout, 1000);
-  showSimSuccess(EVENTTYPE.BOOKED);
 }
 
 // ------------------------------------------------------------------------------
 
 async function modifyAppointment(e) {
   e.preventDefault();
-  currentEvent = "MODIFIED";
+  currentEvent = EVENTTYPE.MODIFIED;
   THIS = "modifyAppointment:";
-  simResponse = $(".simulate-response");
-  $("#modify_appointment_btn").addClass("loading");
-  simResponse.text("Please wait...").show();
   await updateAppointment(currentEvent);
-  simRemindTimeout = 5; // seconds
-  setTimeout(updateSimRemindTimeout, 1000);
-  showSimReponseSuccess();
 }
 
 // ------------------------------------------------------------------------------
 
 async function rescheduleAppointment(e) {
   e.preventDefault();
-  currentEvent = "RESCHEDULED";
+  currentEvent = EVENTTYPE.RESCHEDULED;
   THIS = "rescheduleAppointment:";
-  simResponse = $(".simulate-response");
-  $("#reschedule_appointment_btn").addClass("loading");
   simResponse.text("Please wait...").show();
   await updateAppointment(currentEvent);
-  simRemindTimeout = 5; // seconds
-  setTimeout(updateSimRemindTimeout, 1000);
-  showSimReponseSuccess();
 }
 
 // ------------------------------------------------------------------------------
 function updateSimRemindTimeout() {
   simRemindTimeout -= 1;
-  showSimReponseSuccess();
+  showSimResponseCountdown();
   if (simRemindTimeout < 1) {
-    simResponse.fadeOut().removeClass("success");
+    countdownSim.fadeOut().removeClass("success");
     $(BUTTON.REMIND).show();
   } else {
     setTimeout(updateSimRemindTimeout, 1000);
@@ -211,177 +196,57 @@ function updateSimRemindTimeout() {
 // --------------------------------------------------------------------------------
 async function remindAppointment(e) {
   e.preventDefault();
-  THIS = 'remindAppointment:';
-  userActive = true;
-
-  simResponse = $('.simulate-response');
-
-  $(BUTTON.REMIND).addClass('loading');
-  simResponse.text('Please wait...').show();
-
-  fetch('/deployment/simulation-event', {
-    method: 'POST',
-    headers: {
-      Accept: 'application/json',
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-      token: token,
-      command: EVENTTYPE.REMIND,
-    }),
-  })
-    .then((response) => response.json())
-    .then((r) => {
-      showSimSuccess(EVENTTYPE.REMIND);
-    })
-    .catch(() => {
-      showSimReponseError('Unable to send your appointment reminder request.');
-    })
-    .finally(() => {
-      $(BUTTON.REMIND).removeClass('loading');
-    });
+  THIS = "remindAppointment:";
+  currentEvent = EVENTTYPE.REMIND;
+  await updateAppointment(currentEvent);
+  // Show sim for count down
+  simRemindTimeout = 120; // seconds
+  setTimeout(updateSimRemindTimeout, 1000);
 }
 
 async function noshowedAppointment(e) {
   e.preventDefault();
-  THIS = 'noshowedAppointment:';
-  userActive = true;
-  simResponse = $('.simulate-response');
-
-  $(BUTTON.NOSHOWED).addClass('loading');
-  simResponse.text('Please wait...').show();
-
-  const patientName = $('#patient-name').val();
-  const phoneNumber = $('#patient-phone-number').val();
-
-  if (patientName === '' || phoneNumber === '') {
-    showSimReponseError('Patient name and phone number must be filled');
-    return;
-  }
-
-  fetch('/deployment/simulation-event', {
-    method: 'POST',
-    headers: {
-      Accept: 'application/json',
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-      token: token,
-      command: EVENTTYPE.NOSHOWED,
-      firstName: patientName,
-      phoneNumber: phoneNumber,
-    }),
-  })
-    .then((resp) => {
-      showSimSuccess(EVENTTYPE.NOSHOWED);
-    })
-    .catch((err) => {
-      showSimReponseError('Unable to send your appointment request.');
-    })
-    .finally(() => {
-      $(BUTTON.NOSHOWED).removeClass('loading');
-    });
+  THIS = "noshowedAppointment:";
+  currentEvent = EVENTTYPE.NOSHOWED;
+  await updateAppointment(currentEvent);
 }
 
 async function confirmAppointment(e) {
   e.preventDefault();
-  THIS = 'confirmAppointment:';
-  userActive = true;
-  simResponse = $('.simulate-response');
-
-  $(BUTTON.CONFIRMED).addClass('loading');
-  simResponse.text('Please wait...').show();
-
-  const patientName = $('#patient-name').val();
-  const phoneNumber = $('#patient-phone-number').val();
-
-  if (patientName === '' || phoneNumber === '') {
-    showSimReponseError('Patient name and phone number must be filled');
-    return;
-  }
-
-  fetch('/deployment/simulation-event', {
-    method: 'POST',
-    headers: {
-      Accept: 'application/json',
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-      token: token,
-      command: EVENTTYPE.CONFIRMED,
-      firstName: patientName,
-      phoneNumber: phoneNumber,
-    }),
-  })
-    .then((resp) => {
-      showSimSuccess(EVENTTYPE.CONFIRMED);
-    })
-    .catch((err) => {
-      showSimReponseError('Unable to send your appointment request.');
-    })
-    .finally(() => {
-      $(BUTTON.CONFIRMED).removeClass('loading');
-    });
+  THIS = "confirmAppointment:";
+  currentEvent = EVENTTYPE.CONFIRMED;
+  await updateAppointment(currentEvent);
 }
 
 async function cancelAppointment(e) {
   e.preventDefault();
-  THIS = 'cancelAppointment:';
-  userActive = true;
-  simResponse = $('.simulate-response');
-
-  $(BUTTON.CANCELED).addClass('loading');
-  simResponse.text('Please wait...').show();
-
-  const patientName = $('#patient-name').val();
-  const phoneNumber = $('#patient-phone-number').val();
-
-  if (patientName === '' || phoneNumber === '') {
-    showSimReponseError('Patient name and phone number must be filled');
-    return;
-  }
-
-  fetch('/deployment/simulation-event', {
-    method: 'POST',
-    headers: {
-      Accept: 'application/json',
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-      token: token,
-      command: EVENTTYPE.CANCELED,
-      firstName: patientName,
-      phoneNumber: phoneNumber,
-    }),
-  })
-    .then((resp) => {
-      showSimSuccess(EVENTTYPE.CANCELED);
-    })
-    .catch((err) => {
-      showSimReponseError('Unable to send your appointment request.');
-    })
-    .finally(() => {
-      $(BUTTON.CANCELED).removeClass('loading');
-    });
+  THIS = "cancelAppointment:";
+  currentEvent = EVENTTYPE.CANCELED;
+  await updateAppointment(currentEvent);
 }
 
 function showSimReponseError(message) {
   simResponse.text(message).addClass("failure");
   setTimeout(() => simResponse.fadeOut().removeClass("failure"), 4000);
 }
-function showSimReponseSuccess(event = currentEvent) {
-  simResponse
-    .text(successMessages(simRemindTimeout)[event])
+function showSimResponseCountdown() {
+  countdownSim.show();
+  countdownSim
+    .text(
+      `Your appointment request has been sent. Please wait ${simRemindTimeout} seconds to simulate a reminder.`
+    )
     .addClass("success");
 }
 
 function showSimSuccess(eventtype) {
   // converting to capitalize first letter in the word.
-  if ( eventtype && eventtype.length > 0) {
+  if (eventtype && eventtype.length > 0) {
     eventtype = eventtype[0].toUpperCase() + eventtype.slice(1).toLowerCase();
-    simResponse.text(`Your ${eventtype} request has been sent.`).addClass('success');
-    setTimeout(() => simResponse.fadeOut().removeClass('success'), 4000);
+    simResponse
+      .text(`Your ${eventtype} request has been sent.`)
+      .addClass("success");
+    setTimeout(() => simResponse.fadeOut().removeClass("success"), 4000);
   } else {
-    showSimReponseError('Incorrect event type sent');
+    showSimReponseError("Incorrect event type sent");
   }
 }

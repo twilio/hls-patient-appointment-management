@@ -6,7 +6,17 @@ const { getParam, setParam } = require(path0);
 const ts = Math.round(new Date().getTime() / 1000);
 const tsTomorrow = ts + 17 * 3600;
 
-async function createAppointment(context, appointment) {
+const EVENTTYPE = {
+  BOOKED: 'BOOKED',
+  CONFIRMED: 'CONFIRMED',
+  REMIND: 'REMIND',
+  CANCELED: 'CANCELED',
+  NOSHOWED: 'NOSHOWED',
+  MODIFIED: 'MODIFIED',
+  RESCHEDULED: 'RESCHEDULED',
+};
+
+async function executeFlow(context, appointment) {
   context.FLOW_SID = await getParam(context, 'FLOW_SID');
 
   // ---------- execute flow
@@ -30,9 +40,7 @@ async function createAppointment(context, appointment) {
   }
 }
 
-async function remindAppointment(context) {
-  // TODO: To be implemented
-}
+
 
 exports.handler = function (context, event, callback) {
   const path = Runtime.getFunctions()['auth'].path;
@@ -53,8 +61,8 @@ exports.handler = function (context, event, callback) {
 
   const response = new Twilio.Response();
   response.appendHeader('Content-Type', 'application/json');
-  const appointment = {
-    event_type: event.command,
+  let appointment = {
+    event_type: `${event.command}`,
     event_datetime_utc: null,
     patient_id: '1000',
     patient_first_name: event.firstName,
@@ -71,10 +79,16 @@ exports.handler = function (context, event, callback) {
   };
 
   switch (event.command) {
-    case 'BOOKED':
-      console.log(event)
+    case EVENTTYPE.BOOKED:
+    case EVENTTYPE.REMIND:
+    case EVENTTYPE.CONFIRMED:
+    case EVENTTYPE.CANCELED:
+    case EVENTTYPE.NOSHOWED:
+    case EVENTTYPE.MODIFIED:
+    case EVENTTYPE.RESCHEDULED:
+      // appointment.event_type = event.command;
       // Call studio flow with appointment
-      createAppointment(context, appointment)
+      executeFlow(context, appointment)
         .then(function () {
           response.setBody({});
           callback(null, response);
@@ -84,45 +98,6 @@ exports.handler = function (context, event, callback) {
           callback(err, null);
         });
       break;
-    case 'MODIFIED':
-      // Call studio flow with appointment
-      createAppointment(context, appointment)
-        .then(function () {
-          response.setBody({});
-          callback(null, response);
-        })
-        .catch(function (err) {
-          console.log(err);
-          callback(err, null);
-        });
-      break;
-
-    case 'RESCHEDULED':
-      // Call studio flow with appointment
-      createAppointment(context, appointment)
-        .then(function () {
-          response.setBody({});
-          callback(null, response);
-        })
-        .catch(function (err) {
-          console.log(err);
-          callback(err, null);
-        });
-      break;
-
-    case 'REMIND':
-      // Call studio flow with appointment
-      remindAppointment(context)
-        .then(function () {
-          response.setBody({});
-          callback(null, response);
-        })
-        .catch(function (err) {
-          console.log(err);
-          callback(err, null);
-        });
-      break;
-
     default:
       return callback('Invalid command', null);
   }

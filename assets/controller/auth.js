@@ -117,6 +117,7 @@ async function mfa(e) {
       $("#mfa-form").hide();
       $("#mfa-input").val("");
       $("#auth-successful").show();
+      readyToUse();
       scheduleTokenRefresh();
     })
     .catch((err) => console.log(err));

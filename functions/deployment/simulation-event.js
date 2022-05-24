@@ -11,7 +11,9 @@ const EVENTTYPE = {
   CONFIRMED: 'CONFIRMED',
   REMIND: 'REMIND',
   CANCELED: 'CANCELED',
-  NOSHOWED: 'NOSHOWED'
+  NOSHOWED: 'NOSHOWED',
+  MODIFIED: 'MODIFIED',
+  RESCHEDULED: 'RESCHEDULED',
 };
 
 async function executeFlow(context, appointment) {
@@ -31,9 +33,9 @@ async function executeFlow(context, appointment) {
       .getTwilioClient()
       .studio.flows(context.FLOW_SID)
       .executions.create(params);
-      const executionSid = response.sid;
+    const executionSid = response.sid;
   }
-  catch(err)  {
+  catch (err) {
     console.log("Error", err)
   }
 }
@@ -59,7 +61,6 @@ exports.handler = function (context, event, callback) {
 
   const response = new Twilio.Response();
   response.appendHeader('Content-Type', 'application/json');
-  const apptDatetime = new Date(tsTomorrow * 1000);
   let appointment = {
     event_type: `${event.command}`,
     event_datetime_utc: null,
@@ -69,19 +70,22 @@ exports.handler = function (context, event, callback) {
     patient_phone: event.phoneNumber,
     provider_id: 'afauci',
     provider_first_name: 'Anthony',
-    provider_last_name: 'Diaz',
+    provider_last_name: event.appointmentProvider,
     provider_callback_phone: '(800) 555-2222',
-    appointment_location: 'Pacific Primary Care',
+    appointment_location: event.appointmentLocation,
     appointment_id: '20000',
     appointment_timezone: '-0700',
-    appointment_datetime: apptDatetime.toISOString(),
+    appointment_datetime: event.appointmentDate,
   };
+
   switch (event.command) {
     case EVENTTYPE.BOOKED:
     case EVENTTYPE.REMIND:
     case EVENTTYPE.CONFIRMED:
     case EVENTTYPE.CANCELED:
     case EVENTTYPE.NOSHOWED:
+    case EVENTTYPE.MODIFIED:
+    case EVENTTYPE.RESCHEDULED:
       // appointment.event_type = event.command;
       // Call studio flow with appointment
       executeFlow(context, appointment)

@@ -1,6 +1,7 @@
 FROM twilio/twilio-cli:latest
 ARG ACCOUNT_SID=sid
 ARG AUTH_TOKEN=token
+ARG COUNTRY_CODE=US
 
 RUN twilio plugins:install @twilio-labs/plugin-serverless
 

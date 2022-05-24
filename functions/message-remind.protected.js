@@ -19,18 +19,34 @@ const { validateAppointment } = require(generalHelpersPath);
 exports.handler = async function (context, event, callback) {
   console.log(THIS, 'Begin');
   console.time(THIS);
+  const response = new Twilio.Response();
   try {
+
+    if (!event.hasOwnProperty('appointment')) {
+      response.setBody({
+        Error: "Missing appointment object in request body!"
+      });
+      response.setStatusCode(400);
+      return callback(null, response);
+    }
 
     // convert appointment string to json
     const appointment = getAppointmentObject(event.appointment);
+    if (!hasAllAppointmentProperties(appointment)) {
+      response.setBody({
+        Error: "Missing attributes in the appointment object!"
+      });
+      response.setStatusCode(400);
+      return callback(null, response);
+    }
     validateAppointment(context, appointment);
-    appointment.event_type = 'REMIND'; // over-ride
+    appointment.event_type = 'CONFIRM'; // over-ride
 
-    const response = {
-      code: 200,
+    response.setStatusCode(200);
+    response.setBody({
       event_type: appointment.event_type,
-      appointment_s3key: new_state_file_s3key,
-    };
+      data: "Appointment Reminder for Patient!"
+    });
     return callback(null, response);
   } catch (err) {
     console.log(err);

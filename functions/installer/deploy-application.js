@@ -51,9 +51,13 @@ exports.handler = async function(context, event, callback) {
     //console.log(THIS, params);
 
     console.log(THIS, `Completed deployment of ${application_name}`);
+    const environment_domain = service_sid ? await getParam(context, 'ENVIRONMENT_DOMAIN_NAME') : null;
+    const application_url = service_sid ? `https://${environment_domain}` : "";
+
 
     return callback(null, {
       service_sid: service_sid,
+      application_url,
       service_status: 'DEPLOYED',
     });
 

@@ -172,10 +172,13 @@ exports.handler = async function (context, event, callback) {
 
       default:
         return callback('undefined action!');
-        break;
     }
 
-    return callback(null, `${action} success`);
+    return callback(null, {
+      status: `${action} success`,
+      flowId: flow.sid,
+      flowUrl: flow.url
+    });
   } catch (err) {
     console.log(err);
     return callback(err);

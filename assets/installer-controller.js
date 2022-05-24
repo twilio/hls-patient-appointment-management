@@ -30,10 +30,18 @@ window.addEventListener('load', async () => {
     await addVariable(v, v.value);
   }
 
-  if (messagingServiceSid && messagingServiceSid !== 'NOT-DEPLOYED' && isServiceDeployed()) {
+  const {
+    isDeployed,
+    applicationUrl,
+    serviceSid
+  } = await checkServiceDeployment();
+  
+  if (messagingServiceSid && messagingServiceSid !== 'NOT-DEPLOYED' && isDeployed) {
     $('#messaging_service_sid').val(messagingServiceSid);
     $('#messaging_service_sid').prop("disabled", true);
     $('#service-deployed').show();
+    $('#application-open').attr('href', applicationUrl);
+    $('#service-open').attr('href', `https://www.twilio.com/console/functions/api/start/${serviceSid}`);
   } else if (messagingServiceSid && messagingServiceSid === 'NOT-DEPLOYED') {
     $('#service-deploy').show();
     $('service-deployed').hide();
@@ -65,12 +73,12 @@ async function getAppContext() {
 async function deployApplication(event) {
   console.log("CLICKED");
   event.preventDefault();
-  $('#service-deployed').hide();
 
   const input = validateInput();
   const validated = input.every(i => i.isValid);
   console.log(validated);
   if (!validated) return;
+  $('#service-deployed').hide();
   console.log('variable values validated');
 
   const configuration = {};
@@ -85,7 +93,8 @@ async function deployApplication(event) {
   
 
   // if service exists, delete first before deploying again
-  if (isServiceDeployed()) {
+  const { isDeployed } = await checkServiceDeployment();
+  if (isDeployed) {
     await fetch('/installer/delete-service', {
       method: 'GET',
       headers: {
@@ -97,30 +106,30 @@ async function deployApplication(event) {
     .catch(err => { console.error(err) });
   }
 
-  // First Deploy the Functions
-  const serviceResp = await fetch('/installer/deploy-application', {
-    method: 'POST',
-    headers: {
-        Accept: 'application/json',
-        'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({ configuration: configuration }),
-  })
-  .then(async (resp) => {
+  try {
+    const serviceResponse =  await fetch('/installer/deploy-application', {
+      method: 'POST',
+      headers: {
+          Accept: 'application/json',
+          'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ configuration: configuration }),
+    });
+    const {service_sid: serviceSid, application_url: applicationUrl} = await serviceResponse.json(); 
     await deployMessagingService('CREATE');
-    await deployStudioFlow(configuration);
     $('#service-deploying').hide();
     $('#service-deploy-button').prop('disabled', false);
     $('#service-deployed').show();
     $('#service-deploy').hide();
-    console.log('Service successfully deployed');
-    return resp.json();
-  })
-  .catch ((err) => {
+    $('#service-open').attr('href', `https://www.twilio.com/console/functions/api/start/${serviceSid}`);
+    $('#application-open').attr('href', applicationUrl);
+  }
+  catch(err) {
     console.log("Error (deployApplication()): ", err);
     $('#service-deploying').hide();
     $('#service-deploy-button').prop('disabled', false);
-  });
+  }
+
   console.log("serviceResp", serviceResp);  
 }
 
@@ -213,7 +222,7 @@ async function isStudioFlowDeployed() {
   return studioFlowResp.status === 'DEPLOYED' ? true : false;
 }
 
-async function isServiceDeployed() {
+async function checkServiceDeployment() {
   const serviceResp = await fetch('/installer/check-application', {
     method: "GET",
     headers: {
@@ -223,11 +232,15 @@ async function isServiceDeployed() {
   })
   .then(resp => resp.json())
   .catch(err => console.error(err));
-  return serviceResp.deploy_state === "DEPLOYED" ? true : false;
+  return {
+    isDeployed: serviceResp.deploy_state === "DEPLOYED",
+    applicationUrl: serviceResp.application_url,
+    serviceSid: serviceResp.service_sid
+  };
 }
 
 async function deployStudioFlow(configuration) {
-  const flowResp = await fetch('/installer/deploy-studio-flow', {
+  return await fetch('/installer/deploy-studio-flow', {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -237,7 +250,6 @@ async function deployStudioFlow(configuration) {
   })
   .then(resp => resp.json())
   .catch(err => console.log(err));
-  console.log("deployStudioFlowm", flowResp);
 }
 
 async function deployMessagingService(action) {

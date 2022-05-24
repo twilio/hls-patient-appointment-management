@@ -321,6 +321,14 @@ function generateToken(account_sid, auth_token, password, salt) {
 
 Save the returned token to replace `YOUR_TOKEN` in `curl` commands below.
 
+### Debugging
+***
+run below command to run application in debug mode. After running the command, go to VSCode
+click on "Run and Debug" icon on the left panel. Click the green play button to attach debugger.
+*** 
+``` zsh
+npx twilio-run --inspect --env=.env.localhost
+```
 
 ### Test Post-Deployment
 

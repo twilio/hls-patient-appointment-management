@@ -12,5 +12,8 @@
     "twilio": "3.76.0",
     "uuid": "^8.3.2",
     "validator": "^13.6.0"
+  },
+  "devDependencies": {
+    "twilio-run": "^3.4.2"
   }
 }

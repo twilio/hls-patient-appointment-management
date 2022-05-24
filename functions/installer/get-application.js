@@ -87,7 +87,7 @@ async function readConfigurationVariables() {
   const client = context.getTwilioClient();
 
   // If country code not present default to US
-  const countryCode = context.COUNTRY_CODE || "US";
+  const countryCode = await getParam(context, 'COUNTRY_CODE') || 'US';
   console.log("Buying a new number....", countryCode);
 
   try {

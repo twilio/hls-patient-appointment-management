@@ -35,6 +35,8 @@ exports.handler = async function (context, event, callback) {
     const APPLICATION_NAME = await getParam(context, 'APPLICATION_NAME');
     const TWILIO_PHONE_NUMBER = await getParam(context, 'TWILIO_PHONE_NUMBER') || event.configuration['TWILIO_PHONE_NUMBER'];;
     const SERVICE_SID = await getParam(context, 'SERVICE_SID');
+    // Customise wait time for simulation
+    const REPLY_WAIT_TIME = await getParam(context, 'REPLY_WAIT_TIME') ?? 120;
     const ENVIRONMENT_SID = await getParam(
       context,
       'ENVIRONMENT_SID'
@@ -66,6 +68,11 @@ exports.handler = async function (context, event, callback) {
       'Replacing YOUR_ENVIRONMENT_DOMAIN_NAME ->',
       ENVIRONMENT_DOMAIN_NAME
     );
+    console.log(
+      THIS,
+      'Replacing YOUR_REPLY_WAIT_TIME ->',
+      REPLY_WAIT_TIME
+    );
     const flow_definition_file =
       Runtime.getAssets()['/studio-flow-template.json'].path;
     let flow_definition = fs
@@ -77,7 +84,8 @@ exports.handler = async function (context, event, callback) {
       .replace(
         /YOUR_ENVIRONMENT_DOMAIN_NAME/g,
         ENVIRONMENT_DOMAIN_NAME
-      );
+      )
+      .replace(/YOUR_REPLY_WAIT_TIME/g, REPLY_WAIT_TIME);
 
     const client = context.getTwilioClient();
     const functions = await client.serverless

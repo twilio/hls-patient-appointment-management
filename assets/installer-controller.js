@@ -117,6 +117,7 @@ async function deployApplication(event) {
     });
     const {service_sid: serviceSid, application_url: applicationUrl} = await serviceResponse.json(); 
     await deployMessagingService('CREATE');
+    await deployStudioFlow(configuration);
     $('#service-deploying').hide();
     $('#service-deploy-button').prop('disabled', false);
     $('#service-deployed').show();
@@ -130,7 +131,6 @@ async function deployApplication(event) {
     $('#service-deploy-button').prop('disabled', false);
   }
 
-  console.log("serviceResp", serviceResp);  
 }
 
 async function addVariable(variable, currentValue = null) {

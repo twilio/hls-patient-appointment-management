@@ -43,6 +43,10 @@
           {
             "key": "IE_ENDPOINT",
             "value": "https://you_ehr_endpoint_url.com/inbound"
+          },
+          {
+            "key": "REPLY_WAIT_TIME",
+            "value": "YOUR_REPLY_WAIT_TIME"
           }
         ],
         "offset": {
@@ -392,7 +396,7 @@
         "body": "Hello, {{flow.data.patient_first_name}}. This is a reminder that you have an appointment scheduled with Dr. {{flow.data.provider_last_name}} for  {{widgets.get-datetime-parts.parsed.readable_datetime}}  at {{flow.data.appointment_location}}.\n\nPlease respond to this message with CONFIRM APPT to confirm or CANCEL APPT to cancel your appointment.\n\nIf you would like to make changes to your appointment details, please call us at {{flow.data.provider_callback_phone}}.\n\n- From {{flow.variables.CUSTOMER_NAME}}",
         "from": "{{flow.channel.address}}",
         "service": "{{trigger.message.InstanceSid}}",
-        "timeout": "120",
+        "timeout": "{{flow.variables.REPLY_WAIT_TIME}}",
         "offset": {
           "y": 1100,
           "x": -170
@@ -686,7 +690,7 @@
         "body": "Hello, {{flow.data.patient_first_name}}. Your appointment with Dr. {{flow.data.provider_last_name}} is scheduled for {{widgets.get-datetime-parts.parsed.readable_datetime}} at {{flow.data.appointment_location}}.\n\nPlease respond to this message with CANCEL APPT to cancel your appointment.\n\nIf you would like to make changes to your appointment details, please call us at {{flow.data.provider_callback_phone}}.\n\n- From {{flow.variables.CUSTOMER_NAME}}",
         "from": "{{flow.channel.address}}",
         "service": "{{trigger.message.InstanceSid}}",
-        "timeout": "120",
+        "timeout": "{{flow.variables.REPLY_WAIT_TIME}}",
         "offset": {
           "y": 1310,
           "x": 560

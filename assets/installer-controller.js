@@ -30,6 +30,8 @@ window.addEventListener('load', async () => {
     await addVariable(v, v.value);
   }
 
+  $('#initializing-deployment').show();
+
   const {
     isDeployed,
     applicationUrl,
@@ -54,6 +56,9 @@ window.addEventListener('load', async () => {
     }
     $('.clone-for-MESSAGING_SERVICE_SID').hide();
   }
+
+  $('#initializing-deployment').hide();
+
 });
 
 async function getAppContext() {

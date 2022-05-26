@@ -42,7 +42,7 @@ window.addEventListener('load', async () => {
     $('#service-deployed').show();
     $('#application-open').attr('href', applicationUrl);
     $('#service-open').attr('href', `https://www.twilio.com/console/functions/api/start/${serviceSid}`);
-  } else if (messagingServiceSid && messagingServiceSid === 'NOT-DEPLOYED') {
+  } else if ((messagingServiceSid && messagingServiceSid === 'NOT-DEPLOYED') || !isDeployed) {
     $('#service-deploy').show();
     $('service-deployed').hide();
     console.log(CONFIGURATION_VARIABLES);

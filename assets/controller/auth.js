@@ -1,7 +1,7 @@
-let token = window.localStorage.getItem("token") || null;
+let token = sessionStorage.getItem("token") || null;
 const TOKEN_REFRESH_INTERVAL = 30 * 60 * 1000;
 
-const setToken = (token) => window.localStorage.setItem("token", token);
+const setToken = (token) => sessionStorage.setItem("token", token);
 
 /**
  * This function show appropriate messages if the token is invalid
@@ -113,7 +113,7 @@ async function mfa(e) {
     .then((r) => {
       token = r.token;
       setToken(r.token);
-      localStorage.setItem("mfaToken", token);
+      sessionStorage.setItem("mfaToken", token);
       $("#mfa-form").hide();
       $("#mfa-input").val("");
       $("#auth-successful").show();
@@ -154,7 +154,6 @@ function login(e) {
     })
     .then((response) => response.json())
     .then((r) => {
-      // Setting the global token variable with new token value. TODO: This has to be moved to localStorage.
       token = r.token;
       setToken(r.token);
       $("#password-form").hide();

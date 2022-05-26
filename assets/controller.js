@@ -49,7 +49,7 @@ window.addEventListener("load", async () => {
   $("#auth-successful").hide();
   $(BUTTON.REMIND).hide();
 
-  if (localStorage.getItem("mfaToken")) {
+  if (sessionStorage.getItem("mfaToken")) {
     $("#password-form").hide();
     $("#auth-successful").show();
     $("#mfa-form").hide();
@@ -81,7 +81,7 @@ async function getSimulationParameters() {
       Accept: "application/json",
       "Content-Type": "application/json",
     },
-    body: JSON.stringify({ token: localStorage.getItem("mfaToken") }),
+    body: JSON.stringify({ token: sessionStorage.getItem("mfaToken") }),
   })
     .then((response) => response.json())
     .then((r) => {

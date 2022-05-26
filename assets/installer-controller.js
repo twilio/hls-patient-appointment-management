@@ -57,7 +57,6 @@ window.addEventListener('load', async () => {
 });
 
 async function getAppContext() {
-  console.log("hello");
   const appResp = await fetch('/installer/get-application', {
     method: "GET",
     headers: {

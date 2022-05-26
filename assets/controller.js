@@ -10,6 +10,10 @@ let userActive = true;
 let simRemindTimeout = 0;
 let currentEvent = null;
 let countdownSim = $(".simulate-response-countdown");
+const ts = Math.round(new Date().getTime());
+const tsTomorrow = ts + 24 * 3600 * 1000;
+let minDate = new Date(tsTomorrow);
+let maxDate = new Date(ts + 24 * 3600 * 1000 * 7);
 
 const baseUrl = new URL(location.href);
 baseUrl.pathname = baseUrl.pathname.replace(/\/index\.html$/, "");
@@ -86,6 +90,8 @@ async function getSimulationParameters() {
       $("#name-sent-from").val(r["customerName"]);
       $("#number-sent-from").val(r["customerPhoneNumber"]);
       $("#date-time").val(date.toISOString().substring(0, 16));
+      $("#date-time").attr("min", minDate.toISOString().substring(0, 16));
+      $("#date-time").attr("max", maxDate.toISOString().substring(0, 16));
       $("#provider").val(r["provider"]);
       $("#location").val(r["location"]);
       // Aug 23, 2021 at 4:30 PM

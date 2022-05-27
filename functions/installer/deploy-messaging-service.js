@@ -1,5 +1,5 @@
 const path0 = Runtime.getFunctions()['helpers'].path;
-const { getParam } = require(path0);
+const { getParam, setParam } = require(path0);
 const path1 = Runtime.getFunctions()['auth'].path;
 const { isValidAppToken } = require(path1);
 
@@ -32,6 +32,8 @@ exports.handler = async function (context, event, callback) {
       await client.messaging.services(service.sid).phoneNumbers
         .create({phoneNumberSid: phoneSid})
         .then(phoneNumber => console.log("Added phoneSid, " + phoneNumber.sid +  ", to messaging service " + service.sid));
+      console.log("Setting MESSAGING_SERVICE_SID", service.sid);
+      await setParam(context, 'MESSAGING_SERVICE_SID', service.sid);
       response.setBody({message: service});
     } else if (event.action === 'DELETE') {
       if (!pamMessageService) {

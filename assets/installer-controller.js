@@ -44,7 +44,7 @@ window.addEventListener('load', async () => {
     $('#service-deployed').show();
     $('#application-open').attr('href', applicationUrl);
     $('#service-open').attr('href', `https://www.twilio.com/console/functions/api/start/${serviceSid}`);
-  } else if ((messagingServiceSid && messagingServiceSid === 'NOT-DEPLOYED') || !isDeployed) {
+  } else if (messagingServiceSid && messagingServiceSid === 'NOT-DEPLOYED') {
     $('#service-deploy').show();
     $('service-deployed').hide();
     console.log(CONFIGURATION_VARIABLES);
@@ -55,6 +55,8 @@ window.addEventListener('load', async () => {
       CONFIGURATION_VARIABLES.splice(idxToRemove, 1);
     }
     $('.clone-for-MESSAGING_SERVICE_SID').hide();
+  } else if(!isDeployed) {
+    $('#service-deploy').show();
   }
 
   $('#initializing-deployment').hide();

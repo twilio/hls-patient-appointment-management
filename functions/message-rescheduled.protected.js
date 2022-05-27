@@ -13,7 +13,14 @@ const THIS = 'save-rescheduled:';
  */
 const messageHelpersPath = Runtime.getFunctions()['scheduled-message-helper'].path;
 const generalHelpersPath = Runtime.getFunctions().helpers.path;
-const { hasAllAppointmentProperties, getAppointmentObject, getScheduledMessages } = require(messageHelpersPath);
+const {
+  hasAllAppointmentProperties,
+  getAppointmentObject,
+  getScheduledMessages,
+  getReminderMessageBody,
+  getSendAtDate,
+  isValidReminderTime,
+} = require(messageHelpersPath);
 const { getParam, validateAppointment } = require(generalHelpersPath);
 
 exports.handler = async function (context, event, callback) {

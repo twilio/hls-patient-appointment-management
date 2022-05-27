@@ -17,7 +17,14 @@ const THIS = 'save-modified:';
  */
 const messageHelpersPath = Runtime.getFunctions()['scheduled-message-helper'].path;
 const generalHelpersPath = Runtime.getFunctions().helpers.path;
-const { hasAllAppointmentProperties, getAppointmentObject, getScheduledMessages } = require(messageHelpersPath);
+const {
+  hasAllAppointmentProperties,
+  getAppointmentObject,
+  getScheduledMessages,
+  getReminderMessageBody,
+  getSendAtDate,
+  isValidReminderTime,
+} = require(messageHelpersPath);
 const { getParam, validateAppointment } = require(generalHelpersPath);
 
 exports.handler = async function (context, event, callback) {
@@ -62,6 +69,18 @@ exports.handler = async function (context, event, callback) {
     for (const message of scheduledMessages) {
       await client.messages(message.sid).update({status: 'canceled'}).then(m => console.log("Canceling and Removing Message: ", m.sid));
       await client.messages(message.sid).remove();
+    }
+
+        // Now we create new scheduled messages with different reminder times
+    const firstReminderTime = getSendAtDate(context.REMINDER_FIRST_TIMING, appointment.appointment_datetime);
+    const secondReminderTime = getSendAtDate(context.REMINDER_SECOND_TIMING, appointment.appointment_datetime);
+
+    if (!isValidReminderTime(firstReminderTime) || !isValidReminderTime(secondReminderTime)) {
+      response.setBody({ 
+        Error: "Reminder times need to be at a minimum of 1 hour from now and at a maximum of 7 days from now!" 
+      });
+      response.setStatusCode(400);
+      return callback(null, response);
     }
 
     // Now send out 2 scheduled messages

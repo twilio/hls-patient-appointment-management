@@ -14,6 +14,7 @@ const ts = Math.round(new Date().getTime());
 const tsTomorrow = ts + 24 * 3600 * 1000;
 let minDate = new Date(tsTomorrow);
 let maxDate = new Date(ts + 24 * 3600 * 1000 * 7);
+const TOKEN_REFRESH_INTERVAL = 30 * 60 * 1000;
 
 const baseUrl = new URL(location.href);
 baseUrl.pathname = baseUrl.pathname.replace(/\/index\.html$/, "");
@@ -41,6 +42,22 @@ const BUTTON = {
   RESCHEDULED: "#reschedule_appointment_btn",
 };
 
+async function checkAuthToken() {
+  const token = sessionStorage.getItem("mfaToken");
+  if (!token) {
+    return;
+  }
+  try {
+    const { token } = await refreshToken();
+    if (token) {
+      $("#password-form").hide();
+      $("#auth-successful").show();
+      $("#mfa-form").hide();
+      $("#ready-to-use").show();
+    }
+  } catch {}
+}
+
 window.addEventListener("load", async () => {
   $("#mfa-form").hide();
   $("#simulate-section").hide();
@@ -49,12 +66,7 @@ window.addEventListener("load", async () => {
   $("#auth-successful").hide();
   $(BUTTON.REMIND).hide();
 
-  if (sessionStorage.getItem("mfaToken")) {
-    $("#password-form").hide();
-    $("#auth-successful").show();
-    $("#mfa-form").hide();
-    $("#ready-to-use").show();
-  }
+  checkAuthToken();
 });
 
 function goSimulate() {
@@ -255,4 +267,42 @@ function showSimSuccess(eventtype) {
   } else {
     showSimReponseError("Incorrect event type sent");
   }
+}
+
+/**
+ * Refresh token to get new token
+ * @returns
+ */
+async function refreshToken() {
+  if (!userActive) return;
+  userActive = false;
+
+  try {
+    const response = await fetch("/refresh-token", {
+      method: "POST",
+      headers: {
+        Accept: "application/json",
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ token: token }),
+    });
+    const { token: newToken } = await response.json();
+    scheduleTokenRefresh();
+    token = newToken;
+    setToken(newToken);
+    return {
+      token: newToken,
+    };
+  } catch {
+    return {
+      token: null,
+    };
+  }
+}
+
+/**
+ * refresh token in certain intervals
+ */
+function scheduleTokenRefresh() {
+  setTimeout(refreshToken, TOKEN_REFRESH_INTERVAL);
 }

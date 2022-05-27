@@ -37,14 +37,17 @@ const BUTTON = {
   RESCHEDULED: "#reschedule_appointment_btn",
 };
 
+function toggleEventButtonState(buttons, state) {
+  buttons.forEach(button => state ? $(button).show() : $(button).hide());
+}
 window.addEventListener("load", async () => {
   $("#mfa-form").hide();
   $("#simulate-section").hide();
   $("#password-form").show();
   $("#password-input").focus();
   $("#auth-successful").hide();
-  $(BUTTON.REMIND).hide();
-
+  toggleEventButtonState([BUTTON.BOOKED],true);
+  toggleEventButtonState(['#patient-action','#provider-action'],false);
   if (localStorage.getItem("mfaToken")) {
     $("#password-form").hide();
     $("#auth-successful").show();
@@ -114,6 +117,7 @@ function triggerEvent(params) {
 
 // --------------------------------------------------------------------------------
 async function updateAppointment(command) {
+  
   THIS = "updateAppointment:";
   userActive = true;
   simResponse = $(".simulate-response");
@@ -130,6 +134,7 @@ async function updateAppointment(command) {
   if (patientName === "" || phoneNumber === "") {
     showSimReponseError("Patient name and phone number must be filled");
     return;
+    // throw exception from here
   }
 
   try {
@@ -158,8 +163,11 @@ async function bookAppointment(e) {
   THIS = "bookAppointment:";
   await updateAppointment(currentEvent);
   // Show sim for count down
-  simRemindTimeout = 120; // seconds
+  simRemindTimeout = 5; // seconds
   setTimeout(updateSimRemindTimeout, 1000);
+  toggleEventButtonState([BUTTON.BOOKED],false);
+  toggleEventButtonState(['#patient-action','#provider-action'],true);
+
 }
 
 // ------------------------------------------------------------------------------
@@ -187,7 +195,7 @@ function updateSimRemindTimeout() {
   showSimResponseCountdown();
   if (simRemindTimeout < 1) {
     countdownSim.fadeOut().removeClass("success");
-    $(BUTTON.REMIND).show();
+    // $(BUTTON.REMIND).show();
   } else {
     setTimeout(updateSimRemindTimeout, 1000);
   }
@@ -199,9 +207,6 @@ async function remindAppointment(e) {
   THIS = "remindAppointment:";
   currentEvent = EVENTTYPE.REMIND;
   await updateAppointment(currentEvent);
-  // Show sim for count down
-  simRemindTimeout = 120; // seconds
-  setTimeout(updateSimRemindTimeout, 1000);
 }
 
 async function noshowedAppointment(e) {
@@ -209,6 +214,8 @@ async function noshowedAppointment(e) {
   THIS = "noshowedAppointment:";
   currentEvent = EVENTTYPE.NOSHOWED;
   await updateAppointment(currentEvent);
+  toggleEventButtonState([BUTTON.BOOKED],true);
+  toggleEventButtonState(['#patient-action','#provider-action'],false);
 }
 
 async function confirmAppointment(e) {
@@ -223,6 +230,8 @@ async function cancelAppointment(e) {
   THIS = "cancelAppointment:";
   currentEvent = EVENTTYPE.CANCELED;
   await updateAppointment(currentEvent);
+  toggleEventButtonState([BUTTON.BOOKED],true);
+  toggleEventButtonState(['#patient-action','#provider-action'],false);
 }
 
 function showSimReponseError(message) {

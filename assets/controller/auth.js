@@ -1,4 +1,4 @@
-let token = sessionStorage.getItem("mfaToken") || null;
+let token = localStorage.getItem("mfaToken") || null;
 const setToken = (token) => localStorage.setItem("mfaToken", token);
 
 /**

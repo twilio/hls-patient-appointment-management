@@ -30,6 +30,8 @@ window.addEventListener('load', async () => {
     await addVariable(v, v.value);
   }
 
+  $('#initializing-deployment').show();
+
   const {
     isDeployed,
     applicationUrl,
@@ -53,11 +55,15 @@ window.addEventListener('load', async () => {
       CONFIGURATION_VARIABLES.splice(idxToRemove, 1);
     }
     $('.clone-for-MESSAGING_SERVICE_SID').hide();
+  } else if(!isDeployed) {
+    $('#service-deploy').show();
   }
+
+  $('#initializing-deployment').hide();
+
 });
 
 async function getAppContext() {
-  console.log("hello");
   const appResp = await fetch('/installer/get-application', {
     method: "GET",
     headers: {

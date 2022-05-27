@@ -10,6 +10,11 @@ let userActive = true;
 let simRemindTimeout = 0;
 let currentEvent = null;
 let countdownSim = $(".simulate-response-countdown");
+const ts = Math.round(new Date().getTime());
+const tsTomorrow = ts + 24 * 3600 * 1000;
+let minDate = new Date(tsTomorrow);
+let maxDate = new Date(ts + 24 * 3600 * 1000 * 7);
+const TOKEN_REFRESH_INTERVAL = 30 * 60 * 1000;
 
 const baseUrl = new URL(location.href);
 baseUrl.pathname = baseUrl.pathname.replace(/\/index\.html$/, "");
@@ -37,6 +42,21 @@ const BUTTON = {
   RESCHEDULED: "#reschedule_appointment_btn",
 };
 
+async function checkAuthToken() {
+  if (!token) {
+    return;
+  }
+  try {
+    const { token: newToken } = await refreshToken();
+    if (newToken) {
+      $("#password-form").hide();
+      $("#auth-successful").show();
+      $("#mfa-form").hide();
+      $("#ready-to-use").show();
+    }
+  } catch {}
+}
+
 function toggleEventButtonState(buttons, state) {
   buttons.forEach(button => state ? $(button).show() : $(button).hide());
 }
@@ -48,12 +68,7 @@ window.addEventListener("load", async () => {
   $("#auth-successful").hide();
   toggleEventButtonState([BUTTON.BOOKED],true);
   toggleEventButtonState(['#patient-action','#provider-action'],false);
-  if (localStorage.getItem("mfaToken")) {
-    $("#password-form").hide();
-    $("#auth-successful").show();
-    $("#mfa-form").hide();
-    $("#ready-to-use").show();
-  }
+  checkAuthToken();
 });
 
 function goSimulate() {
@@ -80,7 +95,7 @@ async function getSimulationParameters() {
       Accept: "application/json",
       "Content-Type": "application/json",
     },
-    body: JSON.stringify({ token: localStorage.getItem("mfaToken") }),
+    body: JSON.stringify({ token }),
   })
     .then((response) => response.json())
     .then((r) => {
@@ -89,6 +104,8 @@ async function getSimulationParameters() {
       $("#name-sent-from").val(r["customerName"]);
       $("#number-sent-from").val(r["customerPhoneNumber"]);
       $("#date-time").val(date.toISOString().substring(0, 16));
+      $("#date-time").attr("min", minDate.toISOString().substring(0, 16));
+      $("#date-time").attr("max", maxDate.toISOString().substring(0, 16));
       $("#provider").val(r["provider"]);
       $("#location").val(r["location"]);
       // Aug 23, 2021 at 4:30 PM
@@ -139,7 +156,7 @@ async function updateAppointment(command) {
 
   try {
     await triggerEvent({
-      token: token,
+      token,
       command,
       firstName: patientName,
       phoneNumber: phoneNumber,
@@ -258,4 +275,42 @@ function showSimSuccess(eventtype) {
   } else {
     showSimReponseError("Incorrect event type sent");
   }
+}
+
+/**
+ * Refresh token to get new token
+ * @returns
+ */
+async function refreshToken() {
+  if (!userActive) return;
+  userActive = false;
+
+  try {
+    const response = await fetch("/refresh-token", {
+      method: "POST",
+      headers: {
+        Accept: "application/json",
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ token: token }),
+    });
+    const { token: newToken } = await response.json();
+    scheduleTokenRefresh();
+    token = newToken;
+    setToken(newToken);
+    return {
+      token: newToken,
+    };
+  } catch {
+    return {
+      token: null,
+    };
+  }
+}
+
+/**
+ * refresh token in certain intervals
+ */
+function scheduleTokenRefresh() {
+  setTimeout(refreshToken, TOKEN_REFRESH_INTERVAL);
 }

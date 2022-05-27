@@ -1,7 +1,5 @@
-let token = window.localStorage.getItem("token") || null;
-const TOKEN_REFRESH_INTERVAL = 30 * 60 * 1000;
-
-const setToken = (token) => window.localStorage.setItem("token", token);
+let token = localStorage.getItem("mfaToken") || null;
+const setToken = (token) => localStorage.setItem("mfaToken", token);
 
 /**
  * This function show appropriate messages if the token is invalid
@@ -46,41 +44,6 @@ function readyToUse() {
 }
 
 /**
- * Refresh token to get new token
- * @returns
- */
-async function refreshToken() {
-  if (!userActive) return;
-  userActive = false;
-
-  fetch("/refresh-token", {
-    method: "POST",
-    headers: {
-      Accept: "application/json",
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({ token: token }),
-  })
-    .then((response) => {
-      return response;
-    })
-    .then((response) => response.json())
-    .then((r) => {
-      scheduleTokenRefresh();
-      token = r.token;
-      setToken(r.token);
-    })
-    .catch((err) => console.log(err));
-}
-
-/**
- * refresh token in certain intervals
- */
-function scheduleTokenRefresh() {
-  setTimeout(refreshToken, TOKEN_REFRESH_INTERVAL);
-}
-
-/**
  * Trigger multi factor authentication and store the token in the localstorage
  * @param {*} e - HTML event for button click
  */
@@ -113,7 +76,6 @@ async function mfa(e) {
     .then((r) => {
       token = r.token;
       setToken(r.token);
-      localStorage.setItem("mfaToken", token);
       $("#mfa-form").hide();
       $("#mfa-input").val("");
       $("#auth-successful").show();
@@ -154,7 +116,6 @@ function login(e) {
     })
     .then((response) => response.json())
     .then((r) => {
-      // Setting the global token variable with new token value. TODO: This has to be moved to localStorage.
       token = r.token;
       setToken(r.token);
       $("#password-form").hide();

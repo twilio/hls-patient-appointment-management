@@ -43,13 +43,12 @@ const BUTTON = {
 };
 
 async function checkAuthToken() {
-  const token = sessionStorage.getItem("mfaToken");
   if (!token) {
     return;
   }
   try {
-    const { token } = await refreshToken();
-    if (token) {
+    const { token: newToken } = await refreshToken();
+    if (newToken) {
       $("#password-form").hide();
       $("#auth-successful").show();
       $("#mfa-form").hide();
@@ -93,7 +92,7 @@ async function getSimulationParameters() {
       Accept: "application/json",
       "Content-Type": "application/json",
     },
-    body: JSON.stringify({ token: sessionStorage.getItem("mfaToken") }),
+    body: JSON.stringify({ token }),
   })
     .then((response) => response.json())
     .then((r) => {
@@ -152,7 +151,7 @@ async function updateAppointment(command) {
 
   try {
     await triggerEvent({
-      token: token,
+      token,
       command,
       firstName: patientName,
       phoneNumber: phoneNumber,

@@ -1,5 +1,5 @@
 let token = sessionStorage.getItem("mfaToken") || null;
-const setToken = (token) => sessionStorage.setItem("mfaToken", token);
+const setToken = (token) => localStorage.setItem("mfaToken", token);
 
 /**
  * This function show appropriate messages if the token is invalid
@@ -76,7 +76,6 @@ async function mfa(e) {
     .then((r) => {
       token = r.token;
       setToken(r.token);
-      sessionStorage.setItem("mfaToken", token);
       $("#mfa-form").hide();
       $("#mfa-input").val("");
       $("#auth-successful").show();

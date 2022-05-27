@@ -46,10 +46,8 @@ window.addEventListener("load", async () => {
   $("#password-form").show();
   $("#password-input").focus();
   $("#auth-successful").hide();
-  // $(BUTTON.REMIND).hide();
   toggleEventButtonState([BUTTON.BOOKED],true);
-  toggleEventButtonState(['#update-appointment','#notify-appointment','#end-appointment'],false);
-  // toggleEventButtonState([BUTTON.CANCELED, BUTTON.REMIND, BUTTON.CONFIRMED, BUTTON.NOSHOWED, BUTTON.RESCHEDULED, BUTTON.MODIFIED],false);
+  toggleEventButtonState(['#patient-action','#provider-action'],false);
   if (localStorage.getItem("mfaToken")) {
     $("#password-form").hide();
     $("#auth-successful").show();
@@ -168,7 +166,7 @@ async function bookAppointment(e) {
   simRemindTimeout = 5; // seconds
   setTimeout(updateSimRemindTimeout, 1000);
   toggleEventButtonState([BUTTON.BOOKED],false);
-  toggleEventButtonState(['#update-appointment','#notify-appointment','#end-appointment'],true);
+  toggleEventButtonState(['#patient-action','#provider-action'],true);
 
 }
 
@@ -217,7 +215,7 @@ async function noshowedAppointment(e) {
   currentEvent = EVENTTYPE.NOSHOWED;
   await updateAppointment(currentEvent);
   toggleEventButtonState([BUTTON.BOOKED],true);
-  toggleEventButtonState(['#update-appointment','#notify-appointment','#end-appointment'],false);
+  toggleEventButtonState(['#patient-action','#provider-action'],false);
 }
 
 async function confirmAppointment(e) {
@@ -233,7 +231,7 @@ async function cancelAppointment(e) {
   currentEvent = EVENTTYPE.CANCELED;
   await updateAppointment(currentEvent);
   toggleEventButtonState([BUTTON.BOOKED],true);
-  toggleEventButtonState(['#update-appointment','#notify-appointment','#end-appointment'],false);
+  toggleEventButtonState(['#patient-action','#provider-action'],false);
 }
 
 function showSimReponseError(message) {

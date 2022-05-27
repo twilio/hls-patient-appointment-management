@@ -279,7 +279,7 @@
           </div>
           <div>
             <button id="book_appointment_btn" class="button" onclick="bookAppointment(event)">Book Appointment</button>
-            <div id="update-appointment" class="form-group">
+            <!-- <div id="update-appointment" class="form-group">
               <h5><strong>Simulate Update Appointment</strong></h5>
               <button id="modify_appointment_btn" class="button" onclick="modifyAppointment(event)">Modify</button>
               <button id="reschedule_appointment_btn" class="button" onclick="rescheduleAppointment(event)">Reschedule</button>
@@ -292,6 +292,18 @@
             <div id="end-appointment" class="form-group">
               <h5><strong>Simulate End Appointment</strong></h5>
               <button id="cancel_appointment_btn" class="button" onclick="cancelAppointment(event)">Cancel</button>
+              <button id="noshowed_appointment_btn" class="button" onclick="noshowedAppointment(event)">No Show</button>
+            </div> -->
+            <div id="patient-action" class="form-group">
+              <h5><strong>Simulate Patient Action</strong></h5>
+              <button id="cancel_appointment_btn" class="button" onclick="cancelAppointment(event)">Cancel</button>
+              <button id="confirm_appointment_btn" class="button" onclick="confirmAppointment(event)">Confirm</button>
+            </div>
+            <div id="provider-action" class="form-group">
+              <h5><strong>Simulate Provider Action</strong></h5>
+              <button id="modify_appointment_btn" class="button" onclick="modifyAppointment(event)">Modify</button>
+              <button id="reschedule_appointment_btn" class="button" onclick="rescheduleAppointment(event)">Reschedule</button>
+              <button id="remind_appointment_btn" class="button" onclick="remindAppointment(event)">Send Reminder</button>
               <button id="noshowed_appointment_btn" class="button" onclick="noshowedAppointment(event)">No Show</button>
             </div>
           </div>

@@ -1,4 +1,8 @@
 
+const generalHelpersPath = Runtime.getFunctions().helpers.path;
+const { getDatetimeParts  } = require(generalHelpersPath);
+
+
 function getSendAtDate(subtractiveTime, appointmentTime) {
   const hours = parseInt(subtractiveTime.substring(0,2));
   const minutes = parseInt(subtractiveTime.substring(2,4));
@@ -9,10 +13,11 @@ function getSendAtDate(subtractiveTime, appointmentTime) {
 }
 
 function getReminderMessageBody(appointment) {
+  const parsedDateTime = getDatetimeParts(appointment.appointment_datetime)
   return `
     Hello ${appointment.patient_first_name}, \n
     This is a reminder that your appointment with Dr. ${appointment.provider_last_name} is scheduled for 
-    ${appointment.appointment_date + ", " + appointment.appointment_day_of_week + " at " + appointment.appointment_time_of_day}.
+    ${parsedDateTime.readable_datetime} at ${appointment.appointment_location}.
   `
 }
 

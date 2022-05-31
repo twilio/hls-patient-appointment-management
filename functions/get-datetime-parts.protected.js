@@ -1,5 +1,4 @@
 /* eslint-disable camelcase */
-
 /*
  * returns various datetime parts to be used in studio flow SMS message text
  *
@@ -57,11 +56,14 @@ function getDatetimeParts(datetime_iso) {
 }
 
 // --------------------------------------------------------------------------------
-exports.handler = function (context, event, callback) {
-  const assert = require('assert');
-
-  console.log('event', event);
-  assert(event.datetime_iso, 'missing event.datetime_iso!!!');
-
-  return callback(null, getDatetimeParts(event.datetime_iso));
-};
+module.exports = {
+  getDatetimeParts,
+  handler: function (context, event, callback) {
+    const assert = require('assert');
+  
+    console.log('event', event);
+    assert(event.datetime_iso, 'missing event.datetime_iso!!!');
+  
+    return callback(null, getDatetimeParts(event.datetime_iso));
+  }
+}

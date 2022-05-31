@@ -396,6 +396,7 @@ function validateAppointment(context, appointment) {
   return true; // validated
 }
 
+
 module.exports = {
   getParam,
   setParam,

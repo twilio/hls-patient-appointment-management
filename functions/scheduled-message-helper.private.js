@@ -1,6 +1,6 @@
 
-const generalHelpersPath = Runtime.getFunctions().helpers.path;
-const { getDatetimeParts  } = require(generalHelpersPath);
+const getDateTimePartsPath = Runtime.getFunctions()['get-datetime-parts'].path;
+const { getDatetimeParts  } = require(getDateTimePartsPath);
 
 
 function getSendAtDate(subtractiveTime, appointmentTime) {

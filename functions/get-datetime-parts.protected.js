@@ -1,4 +1,7 @@
 /* eslint-disable camelcase */
+const generalHelpersPath = Runtime.getFunctions().helpers.path;
+const { getDatetimeParts  } = require(generalHelpersPath);
+
 
 // --------------------------------------------------------------------------------
 exports.handler = function (context, event, callback) {

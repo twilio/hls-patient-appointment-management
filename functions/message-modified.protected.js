@@ -67,8 +67,13 @@ exports.handler = async function (context, event, callback) {
     }
 
     for (const message of scheduledMessages) {
-      await client.messages(message.sid).update({status: 'canceled'}).then(m => console.log("Canceling and Removing Message: ", m.sid));
-      await client.messages(message.sid).remove();
+      try {
+        await client.messages(message.sid).update({status: 'canceled'}).then(m => console.log("Canceling and Removing Message: ", m.sid));
+        await client.messages(message.sid).remove();
+      }
+      catch(e) {
+        console.error(e);
+      }
     }
 
         // Now we create new scheduled messages with different reminder times

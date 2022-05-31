@@ -52,10 +52,15 @@ exports.handler = async function (context, event, callback) {
     // Remove all messages with the to number
     const allMessages = await client.messages.list({to: appointment.patient_phone}).then(messages => messages);
     for (const message of allMessages) {
-      if (message.status === 'scheduled') {
-        await client.messages(message.sid).update({status: 'canceled'}).then(m => console.log("Canceling and Removing message: ",m));
+      try {
+        if (message.status === 'scheduled') {
+          await client.messages(message.sid).update({status: 'canceled'}).then(m => console.log("Canceling and Removing message: ",m));
+        }
+        await client.messages(message.sid).remove();
       }
-      await client.messages(message.sid).remove();
+        catch(e) {
+          console.error(e);
+      }
     }
     
     response.setStatusCode(200);

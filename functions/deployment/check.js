@@ -124,7 +124,6 @@ async function listParameters(context) {
     AWS_SFN_QUERY_STATE: await getParam(context, 'AWS_SFN_QUERY_STATE'),
     CUSTOMER_CODE: await getParam(context, 'CUSTOMER_CODE'),
     CUSTOMER_NAME: await getParam(context, 'CUSTOMER_NAME'),
-    FILENAME_APPOINTMENT: await getParam(context, 'FILENAME_APPOINTMENT'),
     REMINDER_OUTREACH_START: await getParam(context, 'REMINDER_OUTREACH_START'),
     REMINDER_OUTREACH_FINISH: await getParam(
       context,

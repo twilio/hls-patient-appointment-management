@@ -46,8 +46,9 @@ exports.handler = async function (context, event, callback) {
       }
     });
 
+    const applicationName = await getParam(context, 'APPLICATION_NAME');
     const messagingService = await client.messaging.services.list().then(services => services.find(
-      service => service.friendlyName === await getParam(context, 'APPLICATION_NAME');
+      service => service.friendlyName === applicationName
     ));
   
     const variables = await readConfigurationVariables();

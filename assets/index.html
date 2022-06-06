@@ -65,69 +65,14 @@
     <section>
       <div id="ready-to-use" style="display: none;">
         <h4><span class="checkmark">&#10003;</span> Appointment Management with EHR Integration Application is Ready for Integration</h4>
-
-        <!-- <p>
-          In order to complete the EHR integration,
-          you'll need to provide the following information to your EHR integration implementor.
-          For more details, please refer to <a href="https://twilio-cms-prod.s3.amazonaws.com/documents/EHR_Appointment_Management_App_EHR_Integration_Guide.pdf">EHR Integration Guide</a>.
-        </p> -->
         <p>
           <button onClick="goSimulate()">Go To Simulation Page</button>
         </p>
-        <!-- <table width="100%">
-          <tr>
-            <th>Name</th>
-            <th>Value (where to find)</th>
-          </tr>
-          <tr>
-            <td>Twilio Studio Flow Endpoint URL</td>
-            <td id="integration-endpoint">Note the <i>FLOW REST API URL</i> above.</td>
-          </tr>
-          <tr>
-            <td>Twilio Account SID</td>
-            <td id="integration-twlo-account-sid">Find in <i>Environment Variables</i> in Functions Settings</td>
-          </tr>
-          <tr>
-            <td>Twilio Auth Token for SID</td>
-            <td id="integration-twlo-auth-token">Find in <i>Environment Variables</i> in Functions Settings</td>
-          </tr>
-          <tr>
-            <td>Twilio Phone Number</td>
-            <td id="integration-twlo-phone-number">Find in <i>Environment Variables</i> in Functions Settings</td>
-          </tr>
-        </table> -->
-        <p>
           Once integration is in place with your EHR,
           appointment events will start sending to this application.
         </p>
 
         <h5>Once you have some appointment data, you can query appointment data.</h5>
-<!-- 
-        <div class="state-downloader"></div>
-        <div id="state-query" style="display: none;" class="deployer">
-          <a class="button" onclick="downloadState(event);">Query Appointment State Data</a>
-          <div id="state-downloader button-loader" style="display: none;"></div>
-        </div>
-        <div id="state-querying" style="display: none;" class="deployer">
-          <h4>Appointment State data is being prepared.</h4>
-          <p><div class="lds-ellipsis"><div></div><div></div><div></div><div></div></div><div class="ellipses-text">Please wait, this may take up some time.</div></p>
-        </div>
-        <div id="state-ready" style="display: none;" class="deployer">
-          <a id="state-download" class="button button-outline" href="" target="_blank">Download State Data</a>
-        </div>
-
-        <div class="history-downloader"></div>
-        <div id="history-query" style="display: none;" class="deployer">
-          <a class="button" onclick="downloadHistory(event);">Query Appointment History Data</a>
-          <div id="history-downloader button-loader" style="display: none;"></div>
-        </div>
-        <div id="history-querying" style="display: none;" class="deployer">
-          <h4>Appointment History data is being prepared.</h4>
-          <p><div class="lds-ellipsis"><div></div><div></div><div></div><div></div></div><div class="ellipses-text">Please wait, this may take up some time.</div></p>
-        </div>
-        <div id="history-ready" style="display: none;" class="deployer">
-          <a id="history-download" class="button button-outline" href="" target="_blank">Download History Data</a>
-        </div> -->
 
         <br/>
       </div>
@@ -190,55 +135,57 @@
       <div id="simulation-form">
 
         <form>
+          <div class="form-groups">
+            <div class="form-group">
+              <h5><strong>Messages sent to</strong></h5>
+              <div>
+                <div class="ht info-circle">i
+                  <span class="tooltip">Input the name to whom you would like the SMS to be addressed.</span>
+                </div>
+                <div class="simulate-label"> Name:
+                </div>
+                <div class="simulate-input">
+                  <input  id="patient-name" type="text" name="patient-name" placeholder="First Name">
+                </div>
+              </div>
+              <div>
+                <div class="ht info-circle">i
+                  <span class="tooltip">Input the number where you would like to send simulation SMS.</span>
+                </div>
+                <div class="simulate-label"> Number:
+                </div>
+                <div class="simulate-input">
+                  <input id="patient-phone-number" type="text" name="patient-phone-number" placeholder="+14085551234">
+                </div>
+              </div>
+            </div>
 
-          <div class=form-group>
-            <h5><strong>Messages sent to</strong></h5>
-            <div>
-              <div class="ht info-circle">i
-                <span class="tooltip">Input the name to whom you would like the SMS to be addressed.</span>
+            <div class="form-group">
+              <h5><strong>Messages sent from</strong></h5>
+              <div>
+                <div class="ht info-circle">i
+                  <span class="tooltip">
+                              Pre-populated with CUSTOMER_NAME environment variable. Will display as SMS sender's name.
+                          </span>
+                </div>
+                <div class="simulate-label">Name: </div>
+                <div class="simulate-input">
+                  <input id="name-sent-from" type="text" name="name-sent-from" readonly>
+                </div>
               </div>
-              <div class="simulate-label"> Name:
-              </div>
-              <div class="simulate-input">
-                <input  id="patient-name" type="text" name="patient-name" placeholder="First Name">
+              <div>
+                <div class="ht info-circle">i
+                  <span class="tooltip">
+                              Pre-populated with the TWILIO_PHONE_NUMBER environment variable. This is the number used to send simulation SMS.
+                          </span>
+                </div>
+                <div class="simulate-label">Number: </div>
+                <div class="simulate-input">
+                  <input id="number-sent-from" type="text" name="number-sent-from" readonly>
+                </div>
               </div>
             </div>
-            <div>
-              <div class="ht info-circle">i
-                <span class="tooltip">Input the number where you would like to send simulation SMS.</span>
-              </div>
-              <div class="simulate-label"> Number:
-              </div>
-              <div class="simulate-input">
-                <input id="patient-phone-number" type="text" name="patient-phone-number" placeholder="+14085551234">
-              </div>
-            </div>
-          </div>
 
-          <div class="form-group">
-            <h5><strong>Messages sent from</strong></h5>
-            <div>
-              <div class="ht info-circle">i
-                <span class="tooltip">
-                            Pre-populated with CUSTOMER_NAME environment variable. Will display as SMS sender's name.
-                        </span>
-              </div>
-              <div class="simulate-label">Name: </div>
-              <div class="simulate-input">
-                <input id="name-sent-from" type="text" name="name-sent-from" readonly>
-              </div>
-            </div>
-            <div>
-              <div class="ht info-circle">i
-                <span class="tooltip">
-                            Pre-populated with the TWILIO_PHONE_NUMBER environment variable. This is the number used to send simulation SMS.
-                        </span>
-              </div>
-              <div class="simulate-label">Number: </div>
-              <div class="simulate-input">
-                <input id="number-sent-from" type="text" name="number-sent-from" readonly>
-              </div>
-            </div>
           </div>
 
           <div class="form-group other-variables">
@@ -277,23 +224,8 @@
               </div>
             </div>
           </div>
-          <div>
+          <div class="form-groups">
             <button id="book_appointment_btn" class="button" onclick="bookAppointment(event)">Book Appointment</button>
-            <!-- <div id="update-appointment" class="form-group">
-              <h5><strong>Simulate Update Appointment</strong></h5>
-              <button id="modify_appointment_btn" class="button" onclick="modifyAppointment(event)">Modify</button>
-              <button id="reschedule_appointment_btn" class="button" onclick="rescheduleAppointment(event)">Reschedule</button>
-            </div>
-            <div id="notify-appointment" class="form-group">
-              <h5><strong>Simulate Notify Appointment</strong></h5>
-              <button id="remind_appointment_btn" class="button" onclick="remindAppointment(event)">Send Reminder</button>
-              <button id="confirm_appointment_btn" class="button" onclick="confirmAppointment(event)">Send Confirmation</button>
-            </div>
-            <div id="end-appointment" class="form-group">
-              <h5><strong>Simulate End Appointment</strong></h5>
-              <button id="cancel_appointment_btn" class="button" onclick="cancelAppointment(event)">Cancel</button>
-              <button id="noshowed_appointment_btn" class="button" onclick="noshowedAppointment(event)">No Show</button>
-            </div> -->
             <div id="patient-action" class="form-group">
               <h5><strong>Simulate Patient Action</strong></h5>
               <button id="cancel_appointment_btn" class="button" onclick="cancelAppointment(event)">Cancel</button>

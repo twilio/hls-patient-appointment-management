@@ -27,10 +27,9 @@ td.configuration-value {
   margin: 0;
 }
 
-
 @media only screen and (min-width: 992px) {
   body {
-      font-size: 1.6em;
+    font-size: 1.6em;
   }
 }
 
@@ -50,21 +49,25 @@ h4 {
 
 @media only screen and (min-width: 992px) {
   .form-section-middle .form-group {
-      width: 90%;
+    width: 90%;
   }
 }
 
 @media only screen and (min-width: 992px) {
   form {
-      margin: 7%;
-      width: 40%;
-      min-width: 600px;
+    margin: 3% 7%;
+    width: 40%;
+    min-width: 600px;
+  }
+  .installer-header,
+  .installer-footer {
+    margin: 0 7%;
   }
 }
 
 @media only screen and (min-width: 768px) and (max-width: 1024px) {
   form {
-      width: 50%;
+    width: 50%;
   }
 }
 
@@ -90,8 +93,8 @@ h4 {
 }
 @media only screen and (min-width: 992px) {
   .tooltip {
-      margin-top: 10px;
-      margin-left: 10px;
+    margin-top: 10px;
+    margin-left: 10px;
   }
 }
 
@@ -219,26 +222,26 @@ span.checkmark {
 }
 @keyframes lds-ellipsis1 {
   0% {
-      transform: scale(0);
+    transform: scale(0);
   }
   100% {
-      transform: scale(1);
+    transform: scale(1);
   }
 }
 @keyframes lds-ellipsis3 {
   0% {
-      transform: scale(1);
+    transform: scale(1);
   }
   100% {
-      transform: scale(0);
+    transform: scale(0);
   }
 }
 @keyframes lds-ellipsis2 {
   0% {
-      transform: translate(0, 0);
+    transform: translate(0, 0);
   }
   100% {
-      transform: translate(24px, 0);
+    transform: translate(24px, 0);
   }
 }
 

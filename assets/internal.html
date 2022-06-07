@@ -12,12 +12,14 @@
 <body>
   <header>
     <h1>Appointment Management with EHR Integration Application</h1>
-    <div id="hipaa-disclaimer" style="margin-bottom: 20px;">
+    <div id="hipaa-disclaimer" class="internal-disclaimer">
         Note that this application is designed for prototyping purposes only and you should<br/>
         <a href="https://ahoy.twilio.com/patient-appointment-management" target="_blank">consult with a Twilio Expert</a>
         before publicly offering this service in a production context.
     </div>
-    <button id="remind_appointment_btn" class="button" onclick="sendReminders(event)">Send Reminders</button>
+    <div id="scheduled-messages-info" class="internal-send-reminder-info"></div>
+    <div id="initializing-reminders"><div class="lds-ellipsis"><div></div><div></div><div></div><div></div></div></div>
+    <button id="send_reminder_button" class="internal-send-reminders" class="button" onclick="sendReminders(event)">Send Reminders</button>
   <footer>
       <span class="statement">We can't wait to see what you build.</span>
   </footer>

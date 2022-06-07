@@ -41,8 +41,9 @@ Specifically, the Appointment Management with EHR Integration application implem
 
 This section provides a high-level overview of the application's architecture, including a discussion of the baked-in application components, the EHR integration that is necessary for the app to function, and an  Architecture diagram.
 
-![State Transition](assets/architecture.png)
-
+***
+![Architecture Details](assets/images/architecture.png)
+***
 ### Application Components
 
 ***
@@ -56,6 +57,105 @@ The application's architecture consists of 3 main components that interact close
 ***
 
 This application is intended to sit next to your EHR, and will rely on a near real-time EHR integration interface coupled with the application's components, in order to function.  As long as your EHR integration interface can facilitate the real-time data exchange with the EHR, the app can integrate with a variety of integration methods including HL7 v2 messaging, FHIR, native EHR APIs, or available third-party integration APIs. Once scheduling messages are received by Twilio from your EHR, they are converted into JSON to complete the information flow through Twilio.
+
+## Architecture Details
+
+This section takes a deeper dive into the application's architecture by outlining the specific assets that are included in the app, what each of the application's components do, the functions and resources that are leveraged, as well as describing how events and dispositions are used to maintain appropriate appointment states within the system.
+
+### Application Components
+
+***
+
+Below is a description of each of the components that you will find baked into the application (including Twilio c).
+
+#### Twilio Studio Flow
+
+This application includes a preconfigured Twilio Studio Flow, which implements:
+
+- SMS interaction (outbound & inbound) with the patient per appointment event occurrence
+- Scheduling and Sending messages
+- Communicating to your EHR endpoint for 2-way (inbound to EHR) appointment requests (such as appointment cancelation & appointment confirmation requests)
+
+*For more information on how the Studio Flow component works, check out [Twilio Studio Documentation](https://www.twilio.com/docs/studio).*
+
+#### Twilio Service (Assets & Functions)
+The application leverages service assets and functions
+, which are part of Twilio Runtime.
+Check out [Twilio Runtime Documentation](https://www.twilio.com/docs/runtime)
+for additional information.
+
+#### Assets
+Static assets (files) of the application:
+
+| Asset (under `/assets`) | Description |
+| :-----------------------| :---------- |
+|`/controller.js` |Javascript functions that control application behavior from `index.html`|
+|`/authentication-controller.js` |Javascript functions that control application authentication|
+|`/index.html` |Main application page for application user|
+|`/studio-flow-template.json` |Deployable Studio Flow template|
+|`/style.css` |Stylesheet used in `index.html`|
+|`images/architecture.png` |Technical architecture diagram|
+|`images/token-flow.png` |MFA-based token flow diagram|
+|`installer/index.html` |Helper page for deployment of application|
+|`installer/installer-controller.js` |Javascript functions that control application behavior from `installer/index.html`|
+|`installer/installer.css` |Stylesheet used in `installer/index.html`|
+
+#### Functions
+Functions used in the application:
+
+| Functions (under `/functions`) | Description |
+| :----------------------------- | :---------- |
+|`/auth.js` |Checks authorization|
+|`/get-datetime-parts.js` |Returns multiple datetime parts from ISO8601 string|
+|`/helpers.js` |Shared functions used by other functions|
+|`/scheduled-message-helper.js` |Helper functions used for message scheduling|
+|`/login.js` |Handles login from `index.html` page|
+|`/mfa.js` |Handles MFA logic from `index.html` page|
+|`/refresh-token.js` | Provides updated token periodically to `index.html` page|
+|`/message-booked.js` |Triggers booked appointment notification event|
+|`/message-cancel.js` |Triggers cancel appointment request event|
+|`/message-canceled.js` |Triggers canceled appointment notification event|
+|`/message-confirm.js` |Triggers confirm appointment request event|
+|`/message-confirmed.js` |Triggers confirmed appointment notification event|
+|`/message-modified.js` |Triggers modified appointment notification event|
+|`/message-noshowed.js` |Triggers noshowed appointment notification event|
+|`/message-opted-out.js` |Triggers opted-out appointment notification event|
+|`/message-remind.js` |Triggers appointment reminder event|
+|`/message-rescheduled.js` |Triggers rescheduled appointment notification event|
+|`installer/check-studio-flow.js` |Checks deployment state of Twilio Studio Flow|
+|`installer/check-application.js` |Checks deployment state of the application|
+|`installer/get-application.js` |Get state of the deployed application|
+|`installer/deploy-studio-flow.js` |Deploys Twilio Studio Flow|
+|`installer/deploy-application.js` |Deploy Twilio services|
+|`installer/deploy-messaging-service.js` |Deploy Twilio Messaging Service|
+|`installer/delete-service.js` |Delete existing services of the application|
+|`deployment/simulation-parameters.js` |Gets customer parameters for display in simulation page |
+|`deployment/simulation-event.js` | Simulates events in the simulation page |
+|`deployment/test-deployment.js` |Executes tests post deployment (excludes inbound communication to EHR)|
+
+
+#### Multi-Factor Authentication
+
+This application uses multi-factor authentication using JSON Web Tokens and a six digit MFA code. When you login to the application with a password, a six digit code is sent to the `ADMINISTRATOR_PHONE_NUMBER` which must be entered on the next prompt from the application. The logic uses two JSON Web Tokens (JWT). The `JWT for MFA` is generated by `login.js` and is valid for validating the MFA code entered by the user. This token contains the code as a payload in an encrypted form so that `mfa.js` can compare the code entered on the UI with that inside the token to confirm authentication. The following diagram shows the overall flow of token exchange between the browser and the Twilio functions. 
+
+![MFA Token Flow](assets/images/token-flow.pngfix)
+
+
+### Appointment States (Events & Dispositions)
+
+***
+
+The state of an appointment is represented through transition of dispositions based on various events. The blue box in the diagram below represents the `disposition` that appointments transition through based on events. EHR initiated events are highlighted in blue, while Twilio (or the patient response to SMS) initiated events are highlighted in red.
+
+Ideally, the initial appointment event should be `booked`. However, appointment events integrated from your EHR will include appointments that are already booked in the EHR system. Therefore, the application can accept any appointment event as the initial event and correctly transition the disposition state.
+
+## Technical Customization Guide
+
+***
+
+***
+
+This section is intended for technical developers who wish to customize this application to meet your organization's specific requirements. Here you will find an outline of requirements for setting up and deploying a development-specific environment for modifying the prototype application, testing the application after deployment, as well as steps for customizing your Twilio Studio Flow, Services.
 
 ## Installation Information
 
@@ -102,6 +202,7 @@ The following environment variables are required for proper deployment of this a
 |`APPLICATION_PASSWORD` |The Password used to restrict access to sensitive data (this password will be required to access and manipulate the application after deployment)|Yes|
 |`SALT` |Change this to invalidate existing auth tokens|No|
 |`ADMINISTRATOR_PHONE_NUMBER` |The phone number where you will receive six digit multi-factor authentication (MFA) code after logging in with your password. This needs to be entered as the next step to fully authenticate. |Yes|
+|`REPLY_WAIT_TIME=` |Wait time for reply after book or remind appointment message: *default is 120* |Yes|
 
 To keep your tokens and secrets secure, make sure to not commit the `.env` file in git. When setting up the project with
 ```shell
@@ -109,136 +210,64 @@ twilio serverless:init
 ```
 the Twilio CLI will create a `.gitignore` file that excludes `.env` from the version history.
 
-## Architecture Details
+#### Docker Desktop
 
-***
+Install Docker desktop that includes docker compose CLI will be used to run the application installer locally on your machine.
+Goto [Docker Desktop](https://www.docker.com/products/docker-desktop) and install with default options.
+After installation make sure to start Docker desktop.
 
-***
-
-This section takes a deeper dive into the application's architecture by outlining the specific assets that are included in the app, what each of the application's components do, the functions and resources that are leveraged, as well as describing how events and dispositions are used to maintain appropriate appointment states within the system.
-
-### Application Components
-
-***
-
-Below is a description of each of the components that you will find baked into the application (including Twilio c).
-
-#### Twilio Studio Flow
-
-This application includes a preconfigured Twilio Studio Flow, which implements:
-
-- SMS interaction (outbound & inbound) with the patient per appointment event occurrence
-- Scheduling and Sending messages
-- Communicating to your EHR endpoint for 2-way (inbound to EHR) appointment requests (such as appointment cancelation & appointment confirmation requests)
-
-*For more information on how the Studio Flow component works, check out [Twilio Studio Documentation](https://www.twilio.com/docs/studio).*
-
-#### Twilio Service (Assets & Functions)
-The application leverages service assets and functions
-, which are part of Twilio Runtime.
-Check out [Twilio Runtime Documentation](https://www.twilio.com/docs/runtime)
-for additional information.
-
-#### Assets
-Static assets (files) of the application:
-
-| Asset (under `/assets`) | Description |
-| :-----------------------| :---------- |
-|`/architecture.png` |Technical architecture diagram|
-|`/controller.js` |Javascript functions that control application behavior from `index.html`|
-|`/index.html` |Main application page for application user|
-|`/state-transition.png` |Disposition/state transition diagram|
-|`/studio-flow-template.json` |Deployable Studio Flow template|
-|`/style.css` |Stylesheet used in `index.html`|
-|`/token-flow.png` |MFA-based token flow diagram|
-
-#### Functions
-Functions used in the application:
-
-| Functions (under `/functions`) | Description |
-| :----------------------------- | :---------- |
-|`/authentication-controller.js` |Checks authorization|
-|`/get-datetime-parts.js` |Returns multiple datetime parts from ISO8601 string|
-|`/helpers.js` |Shared functions used by other functions|
-|`/login.js` |Handles login from `index.html` page|
-|`/mfa.js` |Handles MFA logic from `index.html` page|
-|`/refresh-token.js` | Provides updated token periodically to `index.html` page|
-|`/save-booked.js` |Saved booked appointment notification event to S3 bucket|
-|`/save-cancel.js` |Saves cancel appointment request event to S3 bucket|
-|`/save-canceled.js` |Saves canceled appointment notification event to S3 bucket|
-|`/save-confirm.js` |Saves confirm appointment request event to S3 bucket|
-|`/save-confirmed.js` |Saves confirmed appointment notification event to S3 bucket|
-|`/save-modified.js` |Saves modified appointment notification event to S3 bucket|
-|`/save-noshowed.js` |Saves noshowed appointment notification event to S3 bucket|
-|`/save-opted-out.js` |Saves opted-out appointment notification event to S3 bucket|
-|`/save-remind.js` |Saves appointment reminder event to S3 bucket|
-|`/save-rescheduled.js` |Saves rescheduled appointment notification event to S3 bucket|
-|`deployment/check-studio-flow.js` |Checks deployment state of Twilio Studio Flow|
-|`deployment/deploy-studio-flow.js` |Deploys Twilio Studio Flow|
-|`deployment/simulation-parameters.js` |Gets customer parameters for display in simulation page |
-|`deployment/simulation-event.js` | Simulates events in the simulation page |
-|`deployment/test-deployment.js` |Executes tests post deployment (excludes inbound communication to EHR)|
-
-
-#### Multi-Factor Authentication
-
-This application uses multi-factor authentication using JSON Web Tokens and a six digit MFA code. When you login to the application with a password, a six digit code is sent to the `ADMINISTRATOR_PHONE_NUMBER` which must be entered on the next prompt from the application. The logic uses two JSON Web Tokens (JWT). The `JWT for MFA` is generated by `login.js` and is valid for validating the MFA code entered by the user. This token contains the code as a payload in an encrypted form so that `mfa.js` can compare the code entered on the UI with that inside the token to confirm authentication. The following diagram shows the overall flow of token exchange between the browser and the Twilio functions. 
-
-![MFA Token Flow](assets/token-flow.png)
-
-
-### Appointment States (Events & Dispositions)
-
-***
-
-The state of an appointment is represented through transition of dispositions based on various events. The blue box in the diagram below represents the `disposition` that appointments transition through based on events. EHR initiated events are highlighted in blue, while Twilio (or the patient response to SMS) initiated events are highlighted in red.
-
-![State Transition](assets/state-transition.png)
-
-Ideally, the initial appointment event should be `booked`. However, appointment events integrated from your EHR will include appointments that are already booked in the EHR system. Therefore, the application can accept any appointment event as the initial event and correctly transition the disposition state.
-
-## Technical Customization Guide
-
-***
-
-***
-
-This section is intended for technical developers who wish to customize this application to meet your organization's specific requirements. Here you will find an outline of requirements for setting up and deploying a development-specific environment for modifying the prototype application, testing the application after deployment, as well as steps for customizing your Twilio Studio Flow, Services.
-
-### Deploying and Setting up a Development Environment
-
-***
-
-#### Setup Development Environment
-
-1. **Create new app instance:** in order to create a separate instance of the application for modification and development purposes, you will first need to provision a separate (1) Twilio account; (2) EHR endpoint to avoid resource name clashes
-2. **Twilio CLI:** installing the [Twilio CLI](https://www.twilio.com/docs/twilio-cli/quickstart#install-twilio-cli)
-   allows you to manage your Twilio resources from your terminal or command prompt.
-3. **Serverless toolkit:** installing the [serverless toolkit](https://www.twilio.com/docs/labs/serverless-toolkit/getting-started)
-   is CLI tooling to help you develop locally and deploy to Twilio Runtime
-```shell
-twilio plugins:install @twilio-labs/plugin-serverless
-```
-
-4. **Create Directory:** initiate a new project copy that will create a directory `patient-appointment-management`
+#### jq & xq
 
 ```shell
-twilio serverless:init patient-appointment-management --template=patient-appointment-management
+$ brew install jq           # install jq
+...
+$ jq --version              # confirm installation
+jq-1.6
+$ brew install python-yq    # install yq/xq
+...
+$ yq --version              # confirm installation
+yq 2.13.0
 ```
+  
+###Installation Steps
+***
+<em>(Installation of this application is supported on the latest versions of Chrome, Firefox, and Safari.
+Installation via Internet Explorer has not been officially tested
+and although issues are not expected, unforeseen problems may occur)</em>
 
-5. **Environment Variables**: copy `.env` file to `.env.localhost` and supply the appropriate values for the environment variables
+Please ensure that you do not have any running processes
+that is listening on port `3000`
+such as development servers or another HLS installer still running.
 
-6. **Start local server**: start the server locally using `.env.localhost` with the [Twilio CLI](https://www.twilio.com/docs/twilio-cli/quickstart)
+#### Build Installer Docker Image
 
 ```shell
-twilio serverless:start --env=.env.localhost
+docker build --tag hpam --no-cache https://github.com/twilio/hls-patient-appointment-management.git#main
 ```
 
-7. **Access webpage for installation:** open the web page at https://localhost:3000/index.html
+If running on Apple Silicon (M1 chip), add `--platform linux/amd64` option.
 
-8. **Deploy application components:** deploy the following application components
+#### Run Installer Docker Container
 
-  - Twilio Studio Flow
+Replace `${TWILIO_ACCOUNT_SID}` and `${TWILIO_AUTH_TOKEN}` with that of your target Twilio account.
+
+```shell
+docker run --name hpam --rm --publish 3000:3000  \
+--env ACCOUNT_SID=${TWILIO_ACCOUNT_SID} --env AUTH_TOKEN=${TWILIO_AUTH_TOKEN} \
+--interactive --tty hpam
+```
+
+If running on Apple Silicon (M1 chip), add `--platform linux/amd64` option.
+
+#### Open installer in browser
+
+Open http://localhost:3000/installer/index.html
+
+#### Terminate installer
+
+To terminate installer:
+- Enter Control-C in the terminal where `docker run ...` was executed
+- Stop the `hls-outreach-installer` docker container via the Docker Desktop
 
 
 #### Generate Token for Programmatic Function Execution

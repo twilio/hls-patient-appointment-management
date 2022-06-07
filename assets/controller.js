@@ -6,7 +6,6 @@
  */
 let phoneNumber;
 let flowSid;
-let userActive = true;
 let simRemindTimeout = 0;
 let currentEvent = null;
 let countdownSim = $(".simulate-response-countdown");
@@ -14,7 +13,6 @@ const ts = Math.round(new Date().getTime());
 const tsTomorrow = ts + 24 * 3600 * 1000;
 let minDate = new Date(tsTomorrow);
 let maxDate = new Date(ts + 24 * 3600 * 1000 * 7);
-const TOKEN_REFRESH_INTERVAL = 30 * 60 * 1000;
 
 const baseUrl = new URL(location.href);
 baseUrl.pathname = baseUrl.pathname.replace(/\/index\.html$/, "");
@@ -42,6 +40,14 @@ const BUTTON = {
   RESCHEDULED: "#reschedule_appointment_btn",
 };
 
+function redirectIfNeeded() {
+  const urlSearchParams = new URLSearchParams(window.location.search);
+  const params = Object.fromEntries(urlSearchParams.entries());
+  if(params.from) {
+    window.location = params.from;
+  }
+}
+
 async function checkAuthToken() {
   if (!token) {
     return;
@@ -49,6 +55,7 @@ async function checkAuthToken() {
   try {
     const { token: newToken } = await refreshToken();
     if (newToken) {
+      redirectIfNeeded();
       $("#password-form").hide();
       $("#auth-successful").show();
       $("#mfa-form").hide();
@@ -275,42 +282,4 @@ function showSimSuccess(eventtype) {
   } else {
     showSimReponseError("Incorrect event type sent");
   }
-}
-
-/**
- * Refresh token to get new token
- * @returns
- */
-async function refreshToken() {
-  if (!userActive) return;
-  userActive = false;
-
-  try {
-    const response = await fetch("/refresh-token", {
-      method: "POST",
-      headers: {
-        Accept: "application/json",
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ token: token }),
-    });
-    const { token: newToken } = await response.json();
-    scheduleTokenRefresh();
-    token = newToken;
-    setToken(newToken);
-    return {
-      token: newToken,
-    };
-  } catch {
-    return {
-      token: null,
-    };
-  }
-}
-
-/**
- * refresh token in certain intervals
- */
-function scheduleTokenRefresh() {
-  setTimeout(refreshToken, TOKEN_REFRESH_INTERVAL);
 }

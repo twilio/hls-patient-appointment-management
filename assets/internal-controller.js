@@ -17,12 +17,15 @@ async function checkScheduledReminders() {
     $("#initializing-reminders").hide();
     if (scheduledMessages.length) {
       $("#scheduled-messages-info").text(
-        `Found ${scheduledMessages.length + 1} active reminders.`
+        `Found ${scheduledMessages.length} active reminders.`
       );
       $("#send_reminder_button").show();
       return;
     }
-    $("#scheduled-messages-info").text(`There are no active reminders right now.`);
+    $("#send_reminder_button").hide();
+    $("#scheduled-messages-info").text(
+      `There are no active reminders right now.`
+    );
   } catch (err) {
     console.log(err);
   }
@@ -30,16 +33,20 @@ async function checkScheduledReminders() {
 
 window.addEventListener("load", async () => {
   $("#send_reminder_button").hide();
+  $(".internal-tooltip").hide();
   checkAuthToken();
 });
 
 async function sendReminders() {
   try {
     $("#initializing-reminders").show();
-    const scheduledMessagesResponse = await fetch("/send-scheduled-reminders");
-    const sendResults = await scheduledMessagesResponse.json();
-    console.log(result, sendResults);
+    const scheduledMessagesResponse = await fetch("/send-scheduled-reminders", {
+      method: "POST",
+    });
+    await scheduledMessagesResponse.json();
     checkScheduledReminders();
+    $(".internal-tooltip").text("Reminders sent successfully").show();
+    setTimeout(() => $(".internal-tooltip").text("").hide(), 4000);
   } catch {
     $("#initializing-reminders").hide();
     $("#send_reminder_button").hide();

@@ -229,7 +229,7 @@ $ yq --version              # confirm installation
 yq 2.13.0
 ```
   
-###Installation Steps
+### Installation Steps
 ***
 <em>(Installation of this application is supported on the latest versions of Chrome, Firefox, and Safari.
 Installation via Internet Explorer has not been officially tested

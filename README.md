@@ -41,8 +41,9 @@ Specifically, the Appointment Management with EHR Integration application implem
 
 This section provides a high-level overview of the application's architecture, including a discussion of the baked-in application components, the EHR integration that is necessary for the app to function, and an  Architecture diagram.
 
-![State Transition](assets/architecture.png)
-
+***
+![Architecture Details](assets/images/architecture.png)
+***
 ### Application Components
 
 ***
@@ -58,10 +59,6 @@ The application's architecture consists of 3 main components that interact close
 This application is intended to sit next to your EHR, and will rely on a near real-time EHR integration interface coupled with the application's components, in order to function.  As long as your EHR integration interface can facilitate the real-time data exchange with the EHR, the app can integrate with a variety of integration methods including HL7 v2 messaging, FHIR, native EHR APIs, or available third-party integration APIs. Once scheduling messages are received by Twilio from your EHR, they are converted into JSON to complete the information flow through Twilio.
 
 ## Architecture Details
-
-***
-![Architecture Details](assets/images/architecture.png)
-***
 
 This section takes a deeper dive into the application's architecture by outlining the specific assets that are included in the app, what each of the application's components do, the functions and resources that are leveraged, as well as describing how events and dispositions are used to maintain appropriate appointment states within the system.
 

@@ -1,5 +1,46 @@
 let token = localStorage.getItem("mfaToken") || null;
-const setToken = (token) => localStorage.setItem("mfaToken", token);
+let userActive = true;
+const setToken = (token) => localStorage.setItem("mfaToken", token || null);
+
+const TOKEN_REFRESH_INTERVAL = 30 * 60 * 1000;
+
+/**
+ * refresh token in certain intervals
+ */
+function scheduleTokenRefresh() {
+  setTimeout(refreshToken, TOKEN_REFRESH_INTERVAL);
+}
+
+/**
+ * Refresh token to get new token
+ * @returns
+ */
+async function refreshToken() {
+  if (!userActive) return;
+  userActive = false;
+
+  try {
+    const response = await fetch("/refresh-token", {
+      method: "POST",
+      headers: {
+        Accept: "application/json",
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ token: token }),
+    });
+    const { token: newToken } = await response.json();
+    scheduleTokenRefresh();
+    token = newToken;
+    setToken(newToken);
+    return {
+      token: newToken,
+    };
+  } catch {
+    return {
+      token: null,
+    };
+  }
+}
 
 /**
  * This function show appropriate messages if the token is invalid
@@ -79,6 +120,9 @@ async function mfa(e) {
       $("#mfa-form").hide();
       $("#mfa-input").val("");
       $("#auth-successful").show();
+      if (redirectIfNeeded) {
+        redirectIfNeeded();
+      }
       readyToUse();
       scheduleTokenRefresh();
     })
@@ -123,6 +167,9 @@ function login(e) {
       var decodedToken = parseJwt(token);
       if (decodedToken["aud"] === "app") {
         $("#auth-successful").show();
+        if (redirectIfNeeded) {
+          redirectIfNeeded();
+        }
         readyToUse();
         scheduleTokenRefresh();
       } else {

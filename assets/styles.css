@@ -346,3 +346,27 @@ tr.table-placeholder td {
 .reset-display {
   display: block;
 }
+
+.internal-disclaimer {
+  margin-bottom: 20px;
+}
+
+.internal-send-reminders {
+  margin-bottom: 20px;
+}
+
+.internal-send-reminder-info {
+  margin: 20px 0;
+}
+
+.tooltip .internal-tooltip {
+  margin-top: -10px;
+}
+
+.internal-send-reminders {
+  position: relative;
+}
+
+.internal-footer {
+  margin-top: 50px;
+}

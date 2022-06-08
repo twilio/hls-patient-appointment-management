@@ -1,6 +1,6 @@
 let token = localStorage.getItem("mfaToken") || null;
 let userActive = true;
-const setToken = (token) => localStorage.setItem("mfaToken", token);
+const setToken = (token) => localStorage.setItem("mfaToken", token || null);
 
 const TOKEN_REFRESH_INTERVAL = 30 * 60 * 1000;
 

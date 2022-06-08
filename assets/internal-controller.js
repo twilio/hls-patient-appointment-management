@@ -17,7 +17,7 @@ async function checkScheduledReminders() {
     $("#initializing-reminders").hide();
     if (scheduledMessages.length) {
       $("#scheduled-messages-info").text(
-        `Found ${scheduledMessages.length} active reminders.`
+        `Found ${scheduledMessages.length} active reminders. Clicking on send reminders will cancel the ${scheduledMessages.length} scheduled reminders and send the reminders immediately.`
       );
       $("#send_reminder_button").show();
       return;

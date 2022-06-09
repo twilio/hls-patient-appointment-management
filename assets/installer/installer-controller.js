@@ -113,7 +113,8 @@ async function deployApplication(event) {
   }
 
   try {
-    const serviceResponse =  await fetch('/installer/deploy-application', {
+    $('#service-deploy-button').prop('disabled', true);
+    const serviceResponse =  await fetch('/installer/deploy?deployApplication=true', {
       method: 'POST',
       headers: {
           Accept: 'application/json',
@@ -216,7 +217,7 @@ function validateInput() {
 }
 
 async function isStudioFlowDeployed() {
-  const studioFlowResp = await fetch('/installer/check-studio-flow', {
+  const studioFlowResp = await fetch('/installer/check?checkApplication=true', {
     method: "GET",
     headers: {
       "Content-Type": "application/json",
@@ -229,7 +230,7 @@ async function isStudioFlowDeployed() {
 }
 
 async function checkServiceDeployment() {
-  const serviceResp = await fetch('/installer/check-application', {
+  const serviceResp = await fetch('/installer/check?checkStudioFlow=true', {
     method: "GET",
     headers: {
       "Content-Type": "application/json",
@@ -239,14 +240,14 @@ async function checkServiceDeployment() {
   .then(resp => resp.json())
   .catch(err => console.error(err));
   return {
-    isDeployed: serviceResp.deploy_state === "DEPLOYED",
+    isDeployed: serviceResp.status === "DEPLOYED",
     applicationUrl: serviceResp.application_url,
     serviceSid: serviceResp.service_sid
   };
 }
 
 async function deployStudioFlow(configuration) {
-  return await fetch('/installer/deploy-studio-flow', {
+  return await fetch('/installer/deploy?deployStudioFlow=true', {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -259,7 +260,7 @@ async function deployStudioFlow(configuration) {
 }
 
 async function deployMessagingService(action) {
-  const messagingServiceResp = await fetch('/installer/deploy-messaging-service', {
+  const messagingServiceResp = await fetch('/installer/deploy?deployMessagingService=true', {
     method: "POST",
     headers: {
       "Content-Type": "application/json",

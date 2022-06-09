@@ -2,12 +2,11 @@ async function checkAuthToken() {
   if (!token) {
     window.location = "/index.html?from=internal.html";
   }
-  try {
-    await refreshToken();
-    checkScheduledReminders();
-  } catch {
+  const { token: newToken } = await refreshToken();
+  if (!newToken) {
     window.location = "/index.html?from=internal.html";
   }
+  checkScheduledReminders();
 }
 
 async function checkScheduledReminders() {

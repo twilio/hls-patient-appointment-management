@@ -197,9 +197,9 @@ async function deployStudioFlow(context, event, callback) {
     console.time(THIS);
     try {
         // ---------- parameters
-        const CUSTOMER_NAME = await getParam(context, 'CUSTOMER_NAME') || event.configuration['CUSTOMER_NAME'];
+        const CUSTOMER_NAME = event.configuration['CUSTOMER_NAME'];
         const APPLICATION_NAME = await getParam(context, 'APPLICATION_NAME');
-        const TWILIO_PHONE_NUMBER = await getParam(context, 'TWILIO_PHONE_NUMBER') || event.configuration['TWILIO_PHONE_NUMBER'];;
+        const TWILIO_PHONE_NUMBER = event.configuration['TWILIO_PHONE_NUMBER'];;
         const SERVICE_SID = await getParam(context, 'SERVICE_SID');
         // Customise wait time for simulation
         const REPLY_WAIT_TIME = event.configuration['REPLY_WAIT_TIME'] ?? 120;

@@ -13,6 +13,7 @@ const ts = Math.round(new Date().getTime());
 const tsTomorrow = ts + 24 * 3600 * 1000;
 let minDate = new Date(tsTomorrow);
 let maxDate = new Date(ts + 24 * 3600 * 1000 * 7);
+let replyWaitTime;
 
 const baseUrl = new URL(location.href);
 baseUrl.pathname = baseUrl.pathname.replace(/\/index\.html$/, "");
@@ -115,6 +116,7 @@ async function getSimulationParameters() {
       $("#date-time").attr("max", maxDate.toISOString().substring(0, 16));
       $("#provider").val(r["provider"]);
       $("#location").val(r["location"]);
+      replyWaitTime = parseInt(r["replyWaitTime"]) ?? 120;
       // Aug 23, 2021 at 4:30 PM
     })
     .catch((err) => {
@@ -187,7 +189,7 @@ async function bookAppointment(e) {
   try {
     await updateAppointment(currentEvent);
     // Show sim for count down
-    simRemindTimeout = 5; // seconds
+    simRemindTimeout = replyWaitTime; // seconds
     setTimeout(updateSimRemindTimeout, 1000);
     toggleEventButtonState([BUTTON.BOOKED], false);
     toggleEventButtonState(["#patient-action", "#provider-action"], true);

@@ -76,6 +76,7 @@ async function sendReminders() {
   try {
     $("#initializing-reminders").show();
     $(".internal-patient-table").hide();
+    $("#send_reminder_button").hide();
     const scheduledMessagesResponse = await fetch("/send-scheduled-reminders", {
       method: "POST",
       headers: {

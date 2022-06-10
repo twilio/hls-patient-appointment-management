@@ -27,6 +27,7 @@ exports.handler = function (context, event, callback) {
     appointmentTimestamp: tsTomorrow,
     provider: 'Diaz',
     location: 'Pacific Primary Care',
+    replyWaitTime: context.REPLY_WAIT_TIME,
   };
   response.setBody(simulationParameters);
   return callback(null, response);

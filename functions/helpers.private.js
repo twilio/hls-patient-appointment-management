@@ -90,7 +90,7 @@ async function getParam(context, key) {
       }
       case 'SERVICE_SID': {
         const services = await client.serverless.services.list();
-        const service = services.find(async s => s.uniqueName === await getParam(context, 'APPLICATION_NAME'));
+        const service = services.find(s => s.uniqueName === context.APPLICATION_NAME);
         return (service && service.sid) ? service.sid : null;
       }
       case 'ENVIRONMENT_DOMAIN_NAME': {

@@ -9,7 +9,7 @@ const THIS = 'deployment/deploy:';
  * NOTE: that this function can only be run on localhost
  * --------------------------------------------------------------------------------
  */
-const { getParam, setParam, getAllParams, assertLocalhost } = require(Runtime.getFunctions()['helpers'].path);
+const { getParam, setParam, assertLocalhost } = require(Runtime.getFunctions()['helpers'].path);
 const { TwilioServerlessApiClient } = require('@twilio-labs/serverless-api');
 const { getListOfFunctionsAndAssets } = require('@twilio-labs/serverless-api/dist/utils/fs');
 const fs = require('fs');
@@ -38,7 +38,6 @@ async function deployApplication(context, event, callback) {
       .update({ uiEditable: true });
 
     console.log(THIS, 'Provisioning dependent Twilio services');
-    const params = await getAllParams(context);
 
     console.log(THIS, `Completed deployment of ${application_name}`);
     const environment_domain = service_sid ? await getParam(context, 'ENVIRONMENT_DOMAIN_NAME') : null;
@@ -81,7 +80,6 @@ async function getAssets() {
     path: ih.name.replace("index.html", ""),
     name: ih.name.replace("index.html", ""),
   })));
-  //console.log(allAssets);
   return allAssets;
 }
 
@@ -119,11 +117,11 @@ async function deployService(context, envrionmentVariables = {}) {
   let service_sid = await getParam(context, 'SERVICE_SID');
   if (service_sid) {
     // update service
-    console.log('updating services ...');
+    console.log('Updating services ...');
     deployOptions.serviceSid = service_sid;
   } else {
     // create service
-    console.log('creating services ...');
+    console.log('Creating services ...');
     deployOptions.serviceName = await getParam(context, 'APPLICATION_NAME');
   }
 
@@ -204,7 +202,7 @@ async function deployStudioFlow(context, event, callback) {
         const TWILIO_PHONE_NUMBER = await getParam(context, 'TWILIO_PHONE_NUMBER') || event.configuration['TWILIO_PHONE_NUMBER'];;
         const SERVICE_SID = await getParam(context, 'SERVICE_SID');
         // Customise wait time for simulation
-        const REPLY_WAIT_TIME = await getParam(context, 'REPLY_WAIT_TIME') ?? 120;
+        const REPLY_WAIT_TIME = event.configuration['REPLY_WAIT_TIME'] ?? 120;
         const ENVIRONMENT_SID = await getParam(context,'ENVIRONMENT_SID');
         const ENVIRONMENT_DOMAIN_NAME = await getParam(context,'ENVIRONMENT_DOMAIN_NAME');
         const FLOW_SID = await getParam(context, 'FLOW_SID');

@@ -11,6 +11,7 @@ exports.handler = async function (context, event, callback) {
   response.setStatusCode(200);
 
   try {
+    const variables = await readConfigurationVariables();
     const account = await client.api.accounts(context.ACCOUNT_SID).fetch();
     const accountInfo = {
       friendlyName: account.friendlyName,
@@ -31,7 +32,7 @@ exports.handler = async function (context, event, callback) {
 
     // If there is no phone numbers with sms capabilities, create a new one with sms capability.
     if(!phoneNumbers.length) {
-      phoneNumbers = await createTwilioPhoneNumber(context)
+      phoneNumbers = await createTwilioPhoneNumber(context, variables)
     }
 
     if(!phoneNumbers.length) {
@@ -50,8 +51,6 @@ exports.handler = async function (context, event, callback) {
     const messagingService = await client.messaging.services.list().then(services => services.find(
       service => service.friendlyName === applicationName
     ));
-  
-    const variables = await readConfigurationVariables();
 
     response.setBody({
       account: accountInfo,
@@ -84,11 +83,11 @@ async function readConfigurationVariables() {
  * @returns
  */
 
- async function createTwilioPhoneNumber (context) {
+ async function createTwilioPhoneNumber (context, configuration) {
   const client = context.getTwilioClient();
 
   // If country code not present default to US
-  const countryCode = await getParam(context, 'COUNTRY_CODE') || 'US';
+  const countryCode = configuration.find(o => o.key === 'COUNTRY_CODE')?.default || 'US';
   console.log("Buying a new number....", countryCode);
 
   try {

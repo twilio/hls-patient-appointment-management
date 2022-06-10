@@ -12,6 +12,7 @@ async function checkAuthToken() {
 }
 
 function resetTable() {
+  selectedPatientNumbers = new Set();
   $("#internal-table > tbody").empty();
 }
 

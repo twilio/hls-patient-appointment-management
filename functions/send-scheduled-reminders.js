@@ -1,4 +1,7 @@
 async function sendScheduledReminders(context, event, callback) {
+  console.log(event);
+  const { selectedPatientNumbers } = event;
+  console.log(selectedPatientNumbers)
   const client = context.getTwilioClient();
   const allMessages = await client.messages.list();
   const toSet = new Set();
@@ -10,6 +13,9 @@ async function sendScheduledReminders(context, event, callback) {
   const toSendMessages = [];
   for (const message of scheduledMessages) {
     const { sid, body, to, messagingServiceSid } = message;
+    if (!selectedPatientNumbers.includes(to)) {
+      continue;
+    }
     await client.messages(sid).update({ status: "canceled" });
     if (!toSet.has(to)) {
       toSet.add(to);

@@ -370,3 +370,7 @@ tr.table-placeholder td {
 .internal-footer {
   margin-top: 50px;
 }
+
+.internal-patient-table tr:hover {
+  cursor: pointer;
+}

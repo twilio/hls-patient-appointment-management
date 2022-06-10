@@ -1,3 +1,5 @@
+let selectedPatientNumbers = new Set();
+
 async function checkAuthToken() {
   if (!token) {
     window.location = "/index.html?from=internal.html";
@@ -53,4 +55,22 @@ async function sendReminders() {
       `Error sending reminders. Reload the page and try again`
     );
   }
+}
+
+
+function selectPatient(event) {
+  console.log(event);
+  const target = event.currentTarget;
+  const patientNumber = target.dataset.patientNumber;
+  console.log(target);
+  const checkbox = target.getElementsByClassName('patient-checkbox')[0];
+  if(target.dataset.isSelected === "true") {
+    target.dataset.isSelected = false;
+    checkbox.checked = false;
+    selectedPatientNumbers.delete(patientNumber);
+    return;
+  }
+  target.dataset.isSelected = true;
+  checkbox.checked = true;
+  selectedPatientNumbers.add(patientNumber);
 }

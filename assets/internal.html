@@ -47,6 +47,31 @@
       </div>
       <div class="tooltip simulate-response internal-tooltip"></div>
 
+      <div class="internal-patient-table">
+        <table>
+          <tr>
+            <th></th>
+            <th>Body</th>
+            <th>To</th>
+          </tr>
+          <tr onclick="selectPatient(event)" data-patient-number="+919999222291">
+            <td><input class="patient-checkbox" type="checkbox" /></td>
+            <td>John</td>
+            <td>+919999222291</td>
+          </tr>
+          <tr onclick="selectPatient(event)" data-patient-number="+919999222292">
+            <td><input class="patient-checkbox" type="checkbox" /></td>
+            <td>John</td>
+            <td>+919999222292</td>
+          </tr>
+          <tr onclick="selectPatient(event)" data-patient-number="+919999222293">
+            <td><input class="patient-checkbox" type="checkbox" /></td>
+            <td>John</td>
+            <td>+919999222293</td>
+          </tr>
+        </table>
+      </div>
+
       <button
         id="send_reminder_button"
         class="internal-send-reminders"

@@ -1,4 +1,5 @@
 let selectedPatientNumbers = new Set();
+let totalPatientsCount = 0;
 
 async function checkAuthToken() {
   if (!token) {
@@ -18,9 +19,11 @@ function resetTable() {
 
 function displayPatientsList(messages) {
   $(".internal-patient-table").show();
+  totalPatientsCount = messages.length;
   messages.forEach(({ to, body }) => {
     selectedPatientNumbers.add(to);
     const rowElement = document.createElement("tr");
+    rowElement.classList.add("patient_details");
     rowElement.dataset.patientNumber = to;
     rowElement.dataset.isSelected = "true";
     rowElement.onclick = selectPatient;
@@ -41,6 +44,7 @@ function displayPatientsList(messages) {
     );
     $("#internal-table").find("tbody").append(rowElement);
   });
+  updateSelectAllLabel();
 }
 
 async function checkScheduledReminders() {
@@ -101,6 +105,52 @@ async function sendReminders() {
   }
 }
 
+function selectAllPatients() {
+  const patientsList = [...$(".patient_details")];
+  patientsList.forEach((target) => {
+    const patientNumber = target.dataset.patientNumber;
+    const checkbox = target.getElementsByClassName("patient-checkbox")[0];
+    if (target.dataset.isSelected === "false") {
+      target.dataset.isSelected = true;
+      checkbox.checked = true;
+      selectedPatientNumbers.add(patientNumber);
+    }
+  });
+  updateSelectAllLabel();
+}
+
+function resetAllPatients() {
+  const patientsList = [...$(".patient_details")];
+  patientsList.forEach((target) => {
+    const patientNumber = target.dataset.patientNumber;
+    const checkbox = target.getElementsByClassName("patient-checkbox")[0];
+    if (target.dataset.isSelected === "true") {
+      target.dataset.isSelected = false;
+      checkbox.checked = false;
+      selectedPatientNumbers.delete(patientNumber);
+    }
+  });
+  updateSelectAllLabel();
+}
+
+function updateSelectAllLabel() {
+  const isAllSelected = selectedPatientNumbers.size === totalPatientsCount;
+  if (isAllSelected) {
+    $(".select-reset-label").text("Reset All");
+  } else {
+    $(".select-reset-label").text("Select All");
+  }
+  $(".select-reset-checkbox").prop("checked", isAllSelected);
+}
+
+function togglePatientSelection(event) {
+  if (totalPatientsCount === selectedPatientNumbers.size) {
+    resetAllPatients();
+    return;
+  }
+  selectAllPatients();
+}
+
 function selectPatient(event) {
   const target = event.currentTarget;
   const patientNumber = target.dataset.patientNumber;
@@ -115,5 +165,7 @@ function selectPatient(event) {
     selectedPatientNumbers.add(patientNumber);
   }
   console.log(selectedPatientNumbers.size, $("#send_reminder_button"));
+  console.log(selectedPatientNumbers.size,totalPatientsCount);
+  updateSelectAllLabel(); 
   $("#send_reminder_button").prop("disabled", !selectedPatientNumbers.size);
 }

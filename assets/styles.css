@@ -370,3 +370,23 @@ tr.table-placeholder td {
 .internal-footer {
   margin-top: 50px;
 }
+
+.internal-patient-table tr:hover {
+  cursor: pointer;
+}
+
+.select-reset-checkbox {
+  margin: 0;
+  cursor: pointer;
+}
+
+.internal-table-select-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 95px;
+}
+
+.internal-table-select-header p {
+  margin: 0;
+}

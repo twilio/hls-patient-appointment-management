@@ -47,6 +47,20 @@
       </div>
       <div class="tooltip simulate-response internal-tooltip"></div>
 
+      <div class="internal-patient-table">
+        <h5>Active Reminders</h5>
+        <table id="internal-table">
+          <thead>
+            <tr>
+              <th onclick="togglePatientSelection(event)"><div class="internal-table-select-header"><input class="select-reset-checkbox" type="checkbox" /><p class="select-reset-label"></p></div></th>
+              <th>Message Body</th>
+              <th>To</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+
       <button
         id="send_reminder_button"
         class="internal-send-reminders"

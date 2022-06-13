@@ -141,6 +141,7 @@ function updateSelectAllLabel() {
     $(".select-reset-label").text("Select All");
   }
   $(".select-reset-checkbox").prop("checked", isAllSelected);
+  $("#send_reminder_button").prop("disabled", !selectedPatientNumbers.size);
 }
 
 function togglePatientSelection(event) {
@@ -167,5 +168,4 @@ function selectPatient(event) {
   console.log(selectedPatientNumbers.size, $("#send_reminder_button"));
   console.log(selectedPatientNumbers.size,totalPatientsCount);
   updateSelectAllLabel(); 
-  $("#send_reminder_button").prop("disabled", !selectedPatientNumbers.size);
 }

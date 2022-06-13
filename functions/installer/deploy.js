@@ -202,7 +202,8 @@ async function deployStudioFlow(context, event, callback) {
         const TWILIO_PHONE_NUMBER = event.configuration['TWILIO_PHONE_NUMBER'];;
         const SERVICE_SID = await getParam(context, 'SERVICE_SID');
         // Customise wait time for simulation
-        const REPLY_WAIT_TIME = event.configuration['REPLY_WAIT_TIME'] ?? 120;
+        const replyWaitTime = parseInt(event.configuration['REPLY_WAIT_TIME']);
+        const REPLY_WAIT_TIME = isNaN(replyWaitTime) ? 120 :(replyWaitTime >= 0 ? replyWaitTime : 120);
         const ENVIRONMENT_SID = await getParam(context,'ENVIRONMENT_SID');
         const ENVIRONMENT_DOMAIN_NAME = await getParam(context,'ENVIRONMENT_DOMAIN_NAME');
         const FLOW_SID = await getParam(context, 'FLOW_SID');

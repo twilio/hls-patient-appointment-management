@@ -116,7 +116,7 @@ async function getSimulationParameters() {
       $("#date-time").attr("max", maxDate.toISOString().substring(0, 16));
       $("#provider").val(r["provider"]);
       $("#location").val(r["location"]);
-      replyWaitTime = parseInt(r["replyWaitTime"]) ?? 120;
+      replyWaitTime = r["replyWaitTime"] ? (parseInt(r["replyWaitTime"]) > 0 ? parseInt(r["replyWaitTime"]) : 120) : 120;
       // Aug 23, 2021 at 4:30 PM
     })
     .catch((err) => {

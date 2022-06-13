@@ -177,7 +177,8 @@ async function addVariable(variable, currentValue = null) {
       "secret": "password",
       "phone_number": "text",
       "email": "text",
-      "text": "text"
+      "text": "text",
+      "number": "number"
   };
   clonedElement.find('input').attr("type", (formats.hasOwnProperty(variable.format) ? formats[variable.format] : "text"));
 

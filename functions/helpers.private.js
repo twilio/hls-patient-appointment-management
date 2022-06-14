@@ -46,7 +46,7 @@ async function getParam(context, key) {
       case 'SERVICE_SID': // always required
       {
         const services = await client.serverless.services.list();
-        const service = services.find(async s => s.uniqueName === context.APPLICATION_NAME);
+        const service = services.find(s => s.uniqueName === context.APPLICATION_NAME);
 
         // return sid only if deployed; otherwise null
         return service ? service.sid : null;

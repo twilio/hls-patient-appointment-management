@@ -11,25 +11,18 @@
  *   const path = Runtime.getFunctions()['helper'].path;
  *   const { getParam, setParam } = require(path);
  * and call functions directly
- *
- *
  * --------------------------------------------------------------------------------
  */
-
-const assert = require('assert');
-
-
-function assertLocalhost(context) {
-  assert(context.DOMAIN_NAME.startsWith('localhost:'), `Can only run on localhost!!!`);
-  assert(process.env.ACCOUNT_SID, 'ACCOUNT_SID not set in localhost environment!!!');
-  assert(process.env.AUTH_TOKEN, 'AUTH_TOKEN not set in localhost environment!!!');
-}
 
 /* --------------------------------------------------------------------------------
  * retrieve environment variable value
  * --------------------------------------------------------------------------------
  */
+const assert = require("assert");
+
 async function getParam(context, key) {
+  const assert = require('assert');
+
   assert(context.APPLICATION_NAME, 'undefined .env environment variable APPLICATION_NAME!!!');
 
   if (key !== 'SERVICE_SID' // avoid warning
@@ -39,74 +32,97 @@ async function getParam(context, key) {
   }
 
   const client = context.getTwilioClient();
-
   // ----------------------------------------------------------------------
-  try {
-    switch (key) {
-      case 'SERVICE_SID': // always required
-      {
-        const services = await client.serverless.services.list();
-        const service = services.find(async s => s.uniqueName === context.APPLICATION_NAME);
+  switch (key) {
+    case 'SERVICE_SID':
+    {
+      // return sid only if deployed; otherwise null
+      const services = await client.serverless.services.list();
+      const service = services.find(s => s.uniqueName === context.APPLICATION_NAME);
 
-        // return sid only if deployed; otherwise null
-        return service ? service.sid : null;
-      }
-
-      case 'ENVIRONMENT_SID': // always required
-      {
-        const service_sid = await getParam(context, 'SERVICE_SID');
-        if (service_sid === null) return null; // service not yet deployed
-
-        const environments = await client.serverless
-          .services(service_sid)
-          .environments.list({limit : 1});
-
-        return environments.length > 0 ? environments[0].sid : null;
-      }
-
-      case 'ENVIRONMENT_DOMAIN_NAME': {
-        const service_sid = await getParam(context, 'SERVICE_SID');
-        if (service_sid === null) return null; // service not yet deployed
-
-        const environments = await client.serverless
-          .services(service_sid)
-          .environments.list({limit : 1});
-
-        return environments.length > 0 ? environments[0].domainName: null;
-      }
-
-      case 'FLOW_SID':
-      {
-        let flow_sid = null;
-        await client.studio.flows.list({ limit: 100 }).then((flows) =>
-          flows.forEach((f) => {
-            if (f.friendlyName === context.APPLICATION_NAME) {
-              flow_sid = f.sid;
-            }
-          })
-        );
-        return flow_sid;
-      }
-
-      case 'VERIFY_SID':
-      {
-        const services = await client.verify.services.list();
-        let service = services.find(s => s.friendlyName === context.APPLICATION_NAME);
-        if (! service) {
-          console.log(`Verify service not found so creating a new verify service friendlyName=${context.APPLICATION_NAME}`);
-          service = await client.verify.services.create({ friendlyName: context.APPLICATION_NAME });
-        }
-        if (! service) throw new Error('Unable to create a Twilio Verify Service!!! ABORTING!!!');
-
-        await setParam(context, key, service.sid);
-        return service.sid;
-      }
-      default:
-        throw new Error(`Undefined variable ${key} !!!`);
+      return service ? service.sid : null;
     }
-  } catch (err) {
-    console.log(`Unexpected error in getParam for ${key} ... returning null`);
-    return null;
+
+    case 'ENVIRONMENT_SID':
+    {
+      // return sid only if deployed; otherwise null
+      const service_sid = await getParam(context, 'SERVICE_SID');
+      if (service_sid === null) return null; // service not yet deployed
+
+      const environments = await client.serverless
+        .services(service_sid)
+        .environments.list({limit : 1});
+      assert(environments && environments.length > 0, `error fetching environment for service_sid=${service_sid}!!!`);
+
+      return environments[0].sid;
+    }
+
+    case 'ENVIRONMENT_DOMAIN_NAME': {
+      // return domain_name only if deployed; otherwise null
+      const service_sid = await getParam(context, 'SERVICE_SID');
+      if (service_sid === null) return null; // service not yet deployed
+
+      const environments = await client.serverless
+        .services(service_sid)
+        .environments.list({limit : 1});
+      assert(environments && environments.length > 0, `error fetching environment for service_sid=${service_sid}!!!`);
+
+      return environments[0].domainName;
+    }
+
+    case 'VERIFY_SID':
+    {
+      const services = await client.verify.services.list();
+      let service = services.find(s => s.friendlyName === context.APPLICATION_NAME);
+      if (! service) {
+        console.log(`No verify service friendlyName=${context.APPLICATION_NAME}, creating one...`);
+        service = await client.verify.services.create({ friendlyName: context.APPLICATION_NAME });
+      }
+      assert(service, `Unable to create verify service friendlyName=${context.APPLICATION_NAME}`);
+
+      await setParam(context, key, service.sid);
+      return service.sid;
+    }
+
+    case 'MESSAGING_SID':
+    {
+      const services = await client.messaging.services.list();
+      let service = services.find(s => s.friendlyName === context.APPLICATION_NAME);
+      if (! service) {
+        console.log(`No messaging service friendlyName=${context.APPLICATION_NAME}, creating one...`);
+        service = await client.messaging.services.create({ friendlyName: context.APPLICATION_NAME });
+        assert(service, `Unable to create messaging service friendlyName=${context.APPLICATION_NAME}`);
+      }
+
+      if (context.TWILIO_PHONE_NUMBER) {
+        const twilio_phones = await client.incomingPhoneNumbers.list();
+        const twilio_phone = twilio_phones.find(p => p.phoneNumber === context.TWILIO_PHONE_NUMBER);
+        assert(twilio_phone, `no matching incomingPhoneNumber=${context.TWILIO_PHONE_NUMBER}!!!`);
+
+        const phones = await client.messaging.services(service.sid).phoneNumbers.list();
+        let phone = phones.find(p => p.phoneNumber === context.TWILIO_PHONE_NUMBER);
+        if (phones.length === 0 || !phone) {
+          phone = await client.messaging.services(service.sid).phoneNumbers.create({
+            phoneNumberSid: twilio_phone.sid,
+          });
+        }
+        // only save environment variable on service, when phone number is assigned
+        await setParam(context, key, service.sid);
+      }
+
+      return service.sid;
+    }
+
+    case 'FLOW_SID':
+    {
+      const flows = await client.studio.flows.list();
+      const flow = flows ? flows.find(f => f.friendlyName === context.APPLICATION_NAME) : null;
+
+      return flow.sid;
+    }
+
+    default:
+      throw new Error(`Undefined variable ${key} !!!`);
   }
 }
 
@@ -152,31 +168,51 @@ async function setParam(context, key, value) {
   };
 }
 
-async function getAllParams(context) {
 
-  const keys_context = Object.keys(context);
-  // keys defined in getParam function above
-  const keys_derived = [
-    'IS_LOCALHOST',
-  ];
+/*
+ * --------------------------------------------------------------------------------
+ * returns candidate Twilio phone numbers assignable to this application.
+ *
+ * TODO: please customize (e.g., sms capable) to reflect application-specific phone number requirement
+ *
+ * returns: array of { phondSID, phoneNumber, friendlyName }
+ * --------------------------------------------------------------------------------
+ */
+async function retrieveCandidateTwilioPhones(context) {
+  const client = context.getTwilioClient();
 
-  // to force saving of 'secret'
-  await getParam(context, 'TWILIO_API_KEY_SID');
+  const phonesAll = await client.incomingPhoneNumbers.list();
 
-  const keys_all = keys_context.concat(keys_derived).sort();
-  try {
+  // TODO: filter for application-specific capabilities
+  const phonesCandidate = phonesAll.filter(p => p.capabilities.sms);
 
-    const result = {};
-    for (k of keys_all) {
-      if (k === 'getTwilioClient') continue; // exclude getTwilioClient function
-      result[k] = await getParam(context, k);
+  // TODO: sort in application-specific order
+  const flow_sid = await getParam(context, 'FLOW_SID');
+  phonesCandidate.sort(function compareFn(a, b) {
+    const phoneNaturalOrder = a.phoneNumber === b.phoneNumber
+      ? 0
+      : (a.phoneNumber > b.phoneNumber ? -1 : 1);
+
+    if (a.smsUrl && b.smsUrl) {
+      if (a.smsUrl.includes(flow_sid) && b.smsUrl.includes(flow_sid)) return phoneNaturalOrder;
+      else if (a.smsUrl.includes(flow_sid) && ! b.smsUrl.includes(flow_sid)) return -1;
+      else if (! a.smsUrl.includes(flow_sid) && b.smsUrl.includes(flow_sid)) return 1;
+    } else if (a.smsUrl && ! b.smsUrl) {
+      return 1;
+    } else if (! a.smsUrl && b.smsUrl) {
+      return -1;
+    } else {
+      return phoneNaturalOrder;
     }
-    return result;
+  });
 
-  } catch (err) {
-    console.log(err);
-    throw err;
-  }
+  const response = phonesCandidate.map(p => {
+    return {
+      phoneNumber: p.phoneNumber,
+      friendlyName: p.friendlyName,
+    }
+  });
+  return response;
 }
 
 /*
@@ -349,7 +385,6 @@ function validateAppointment(context, appointment) {
 module.exports = {
   getParam,
   setParam,
+  retrieveCandidateTwilioPhones,
   validateAppointment,
-  assertLocalhost,
-  getAllParams,
 };

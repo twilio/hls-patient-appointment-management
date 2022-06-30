@@ -6,7 +6,7 @@ async function checkScheduledReminders(context, event, callback) {
     const { status, messagingServiceSid, to } = message;
     if (
       status === "scheduled" &&
-      messagingServiceSid === context.MESSAGING_SERVICE_SID &&
+      messagingServiceSid === context.MESSAGING_SID &&
       !toSet.has(to)
     ) {
       toSet.add(to);

@@ -8,7 +8,7 @@ async function sendScheduledReminders(context, event, callback) {
   const scheduledMessages = allMessages.filter(
     ({ status, messagingServiceSid }) =>
       status === "scheduled" &&
-      messagingServiceSid === context.MESSAGING_SERVICE_SID
+      messagingServiceSid === context.MESSAGING_SID
   );
   const toSendMessages = [];
   for (const message of scheduledMessages) {

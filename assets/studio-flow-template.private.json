@@ -42,7 +42,7 @@
           },
           {
             "key": "IE_ENDPOINT",
-            "value": "https://you_ehr_endpoint_url.com/inbound"
+            "value": "YOUR_IE_ENDPOINT"
           },
           {
             "key": "REPLY_WAIT_TIME",

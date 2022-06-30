@@ -63,7 +63,7 @@ exports.handler = async function (context, event, callback) {
     // Now send out 2 scheduled messages
     await client.messages
       .create({
-        messagingServiceSid: context.MESSAGING_SERVICE_SID,
+        messagingServiceSid: context.MESSAGING_SID,
         body: getReminderMessageBody(appointment),
         sendAt: firstReminderTime,
         scheduleType: 'fixed',
@@ -73,7 +73,7 @@ exports.handler = async function (context, event, callback) {
 
     await client.messages
       .create({
-          messagingServiceSid: context.MESSAGING_SERVICE_SID,
+          messagingServiceSid: context.MESSAGING_SID,
           body: getReminderMessageBody(appointment),
           sendAt: secondReminderTime,
           scheduleType: 'fixed',

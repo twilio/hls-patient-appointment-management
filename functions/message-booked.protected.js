@@ -49,8 +49,8 @@ exports.handler = async function (context, event, callback) {
     appointment.event_type = 'BOOKED'; // over-ride
 
     // Now we check if the reminder times are
-    await reminder_first_timing = await getParam(context, 'REMINDER_FIRST_TIMING');
-    await reminder_second_timing = await getParam(context, 'REMINDER_SECOND_TIMING');
+    const reminder_first_timing = await getParam(context, 'REMINDER_FIRST_TIMING');
+    const reminder_second_timing = await getParam(context, 'REMINDER_SECOND_TIMING');
     const firstReminderTime = getSendAtDate(reminder_first_timing, appointment.appointment_datetime);
     const secondReminderTime = getSendAtDate(reminder_second_timing, appointment.appointment_datetime);
 

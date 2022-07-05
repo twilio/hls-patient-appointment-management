@@ -130,7 +130,7 @@ async function getSimulationParameters() {
  * @param {*} params - Parameters for the event
  */
 function triggerEvent(params) {
-  console.log(params);
+  console.log('parameters:', params);
   return fetch("/deployment/simulation-event", {
     method: "POST",
     headers: {

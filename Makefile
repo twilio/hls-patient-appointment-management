@@ -19,7 +19,7 @@ endif
 
 # ---------- variables
 APPLICATION_NAME := $(shell basename `pwd`)
-SERVICE_UNAME    := $(APPLICATION_NAME)
+SERVICE_UNAME    := 'patient-appointment-management'
 VERIFY_FNAME     := $(APPLICATION_NAME)
 VERSION          := $(shell jq --raw-output .version package.json)
 INSTALLER_NAME   := hls-pam-installer
@@ -123,7 +123,7 @@ deploy-service: get-verify-sid
 
 
 make-service-editable: get-service-sid
-	twilio api:serverless:v1:services:update --sid=$(SERVICE_SID) --ui-editable -o=json
+	twilio api:serverless:v1:services:update --sid=$(SERVICE_SID) --ui-editable
 
 
 # separate make target needed to be abortable
@@ -139,50 +139,6 @@ undeploy-service: confirm-delete get-service-sid get-verify-sid
     fi
 
 	rm -f .twiliodeployinfo
-
-
-get-flow-sid:
-	$(eval FLOW_SID := $(shell twilio api:studio:v2:flows:list -o=json \
-	| jq --raw-output '.[] | select(.friendlyName == "$(FLOW_FNAME)") | .sid'))
-
-
-deploy-flow: get-flow-sid
-	@if [[ -z "$(FLOW_FNAME)" || -z "$(FLOW_DEFINITION_FILE)" ]]; then \
-  	  echo 'Usage: make deploy-flow FLOW_FNAME={your-flow-fname} FLOW_DEFINITION_FILE={path-to-flow-json-file}'; \
-  	  exit 1; \
-  	fi
-
-	@echo "validating flow definition for flow=$(FLOW_FNAME)"
-	twilio api:studio:v2:flows:validate:create \
-	   --friendly-name $(FLOW_FNAME) \
-	   --status 'published' \
-	   --definition "`cat $(FLOW_DEFINITION_FILE)`"
-
-	@if [[ -z "$(FLOW_SID)" ]]; then \
-	  echo "creating flow=$(FLOW_FNAME)"; \
-	  twilio api:studio:v2:flows:create \
-	  --friendly-name $(FLOW_FNAME) \
-	  --status 'published' \
-	  --commit-message 'deployed via installer' \
-	  --definition "`cat $(FLOW_DEFINITION_FILE)`"; \
-    else \
-	  echo "updating flow=$(FLOW_FNAME)"; \
-	  twilio api:studio:v2:flows:update \
-	  --sid $(FLOW_SID) \
-	  --status 'published' \
-	  --commit-message 'deployed via installer' \
-	  --definition "`cat $(FLOW_DEFINITION_FILE)`"; \
-    fi
-
-
-undeploy-flow: get-flow-sid
-	@if [[ -z "$(FLOW_FNAME)" ]]; then \
-  	  echo 'Usage: make deploy-flow FLOW_FNAME={your-flow-fname}'; \
-	  exit 1; \
-	fi
-
-	echo "deleting flow=$(FLOW_FNAME)";
-	twilio api:studio:v2:flows:remove --sid $(FLOW_SID)
 
 
 deploy-all:  deploy-service make-service-editable
@@ -206,3 +162,5 @@ tail-log: get-service-sid get-environment-sid
 	twilio serverless:logs --service-sid=$(SERVICE_SID) --environment=$(ENVIRONMENT_SID) --tail
 
 
+play:
+	sed '/ACCOUNT_SID=*/d' .env.localhost

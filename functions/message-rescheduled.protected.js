@@ -74,8 +74,8 @@ exports.handler = async function (context, event, callback) {
     }
 
     // Now we create new scheduled messages with different reminder times
-    await reminder_first_timing = await getParam(context, 'REMINDER_FIRST_TIMING');
-    await reminder_second_timing = await getParam(context, 'REMINDER_SECOND_TIMING');
+    const reminder_first_timing = await getParam(context, 'REMINDER_FIRST_TIMING');
+    const reminder_second_timing = await getParam(context, 'REMINDER_SECOND_TIMING');
     const firstReminderTime = getSendAtDate(reminder_first_timing, appointment.appointment_datetime);
     const secondReminderTime = getSendAtDate(reminder_second_timing, appointment.appointment_datetime);
 

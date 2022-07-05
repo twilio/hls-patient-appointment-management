@@ -19,8 +19,10 @@ const EVENTTYPE = {
 async function executeFlow(context, appointment) {
   const { getParam } = require(Runtime.getFunctions()['helpers'].path);
 
-  await flow_sid = await getParam(context, 'FLOW_SID');
-  await twilio_phone_number = await getParam(context, 'TWILIO_PHONE_NUMBER');
+  const flow_sid = await getParam(context, 'FLOW_SID');
+  console.log('flow_sid=', flow_sid);
+  const twilio_phone_number = await getParam(context, 'TWILIO_PHONE_NUMBER');
+  console.log('twilio_phone_number=', twilio_phone_number);
 
   // ---------- execute flow
   const now = new Date();
@@ -30,7 +32,8 @@ async function executeFlow(context, appointment) {
     from: twilio_phone_number,
     parameters: appointment,
   };
-  
+  console.log('simulation parameters:', params);
+
   try {
     const response = await context
       .getTwilioClient()
@@ -45,7 +48,8 @@ async function executeFlow(context, appointment) {
 
 
 
-exports.handler = function (context, event, callback) {
+exports.handler = async function (context, event, callback) {
+  const THIS = 'simulate-event:';
   const path = Runtime.getFunctions()['auth'].path;
   const { isValidAppToken } = require(path);
 
@@ -91,7 +95,7 @@ exports.handler = function (context, event, callback) {
     case EVENTTYPE.RESCHEDULED:
       // appointment.event_type = event.command;
       // Call studio flow with appointment
-      executeFlow(context, appointment)
+      await executeFlow(context, appointment)
         .then(function () {
           response.setBody({});
           callback(null, response);

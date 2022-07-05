@@ -70,6 +70,16 @@ async function getParam(context, key) {
       return environments[0].domainName;
     }
 
+    case 'TWILIO_PHONE_NUMBER':
+    {
+      const flow_sid = await getParam(context, 'FLOW_SID');
+      assert(flow_sid, 'Studio flow not available!!!');
+      const phones = await client.incomingPhoneNumbers.list();
+      const phone = phones.find(p => p.smsUrl.includes(flow_sid));
+
+      return phone ? phone.phoneNumber: null;
+    }
+
     case 'VERIFY_SID':
     {
       const services = await client.verify.services.list();

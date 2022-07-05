@@ -17,21 +17,24 @@ const EVENTTYPE = {
 };
 
 async function executeFlow(context, appointment) {
-  context.FLOW_SID = await getParam(context, 'FLOW_SID');
+  const { getParam } = require(Runtime.getFunctions()['helpers'].path);
+
+  await flow_sid = await getParam(context, 'FLOW_SID');
+  await twilio_phone_number = await getParam(context, 'TWILIO_PHONE_NUMBER');
 
   // ---------- execute flow
   const now = new Date();
   appointment.event_datetime_utc = now.toISOString();
   const params = {
     to: appointment.patient_phone,
-    from: context.TWILIO_PHONE_NUMBER,
+    from: twilio_phone_number,
     parameters: appointment,
   };
   
   try {
     const response = await context
       .getTwilioClient()
-      .studio.flows(context.FLOW_SID)
+      .studio.flows(flow_sid)
       .executions.create(params);
     const executionSid = response.sid;
   }

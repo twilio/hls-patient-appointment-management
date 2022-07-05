@@ -118,11 +118,11 @@ async function getParam(context, key) {
       const flows = await client.studio.flows.list();
       const flow = flows ? flows.find(f => f.friendlyName === context.APPLICATION_NAME) : null;
 
-      return flow.sid;
+      return flow ? flow.sid : null;
     }
 
     default:
-      throw new Error(`Undefined variable ${key} !!!`);
+      throw new Error(`Undefined context variable ${key} !!!`);
   }
 }
 

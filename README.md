@@ -131,7 +131,6 @@ Functions used in the application:
 |`installer/delete-service.js` |Delete existing services of the application|
 |`deployment/simulation-parameters.js` |Gets customer parameters for display in simulation page |
 |`deployment/simulation-event.js` | Simulates events in the simulation page |
-|`deployment/test-deployment.js` |Executes tests post deployment (excludes inbound communication to EHR)|
 
 
 #### Multi-Factor Authentication

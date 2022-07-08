@@ -78,34 +78,6 @@
           "conditions": [
             {
               "type": "equal_to",
-              "friendly_name": "Opted-In",
-              "arguments": [
-                "{{flow.data.event_type}}"
-              ],
-              "value": "OPTED-IN"
-            }
-          ],
-          "event": "match",
-          "next": "send_optedin"
-        },
-        {
-          "conditions": [
-            {
-              "type": "equal_to",
-              "friendly_name": "Optedout",
-              "arguments": [
-                "{{flow.data.event_type}}"
-              ],
-              "value": "OPTED-OUT"
-            }
-          ],
-          "event": "match",
-          "next": "send_optedout"
-        },
-        {
-          "conditions": [
-            {
-              "type": "equal_to",
               "friendly_name": "Booked",
               "arguments": [
                 "{{flow.data.event_type}}"
@@ -623,52 +595,6 @@
         },
         "function_sid": "YOUR_FUNCTION_SID[message-remind]",
         "service_sid": "YOUR_SERVICE_SID"
-      }
-    },
-    {
-      "transitions": [
-        {
-          "event": "sent"
-        },
-        {
-          "event": "failed"
-        }
-      ],
-      "type": "send-message",
-      "name": "send_optedout",
-      "properties": {
-        "body": "Hello, {{flow.data.patient_first_name}}. You have opted out of receiving appointment communication messages. You will no longer receive messages from this number.\n\n- From {{flow.variables.CUSTOMER_NAME}}",
-        "from": "{{flow.channel.address}}",
-        "service": "{{trigger.message.InstanceSid}}",
-        "to": "{{contact.channel.address}}",
-        "offset": {
-          "y": 1580,
-          "x": 490
-        },
-        "channel": "{{trigger.message.ChannelSid}}"
-      }
-    },
-    {
-      "transitions": [
-        {
-          "event": "sent"
-        },
-        {
-          "event": "failed"
-        }
-      ],
-      "type": "send-message",
-      "name": "send_optedin",
-      "properties": {
-        "body": "Hello, {{flow.data.patient_first_name}}. You have opted in to receive appointment communication messages. You can opt out at any time by replying STOP to this message.\n\n- From {{flow.variables.CUSTOMER_NAME}}",
-        "from": "{{flow.channel.address}}",
-        "service": "{{trigger.message.InstanceSid}}",
-        "to": "{{contact.channel.address}}",
-        "offset": {
-          "y": 1850,
-          "x": 440
-        },
-        "channel": "{{trigger.message.ChannelSid}}"
       }
     },
     {

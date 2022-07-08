@@ -70,6 +70,16 @@ async function getParam(context, key) {
       return environments[0].domainName;
     }
 
+    case 'TWILIO_PHONE_NUMBER':
+    {
+      const flow_sid = await getParam(context, 'FLOW_SID');
+      assert(flow_sid, 'Studio flow not available!!!');
+      const phones = await client.incomingPhoneNumbers.list();
+      const phone = phones.find(p => p.smsUrl.includes(flow_sid));
+
+      return phone ? phone.phoneNumber: null;
+    }
+
     case 'VERIFY_SID':
     {
       const services = await client.verify.services.list();
@@ -118,11 +128,11 @@ async function getParam(context, key) {
       const flows = await client.studio.flows.list();
       const flow = flows ? flows.find(f => f.friendlyName === context.APPLICATION_NAME) : null;
 
-      return flow.sid;
+      return flow ? flow.sid : null;
     }
 
     default:
-      throw new Error(`Undefined variable ${key} !!!`);
+      throw new Error(`Undefined context variable ${key} !!!`);
   }
 }
 

@@ -17,7 +17,7 @@ function checkDisableAuthForLocalhost(context) {
 function isValidPassword(password, context) {
   return (
     checkDisableAuthForLocalhost(context) ||
-    password === context.APPLICATION_PASSWORD
+    (context.APPLICATION_PASSWORD && password === context.APPLICATION_PASSWORD)
   );
 }
 

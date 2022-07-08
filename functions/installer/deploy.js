@@ -39,6 +39,8 @@ exports.handler = async function(context, event, callback) {
 
         console.log(THIS, 'Provisioning dependent Twilio services');
         const verify_sid = await getParam(context, 'VERIFY_SID');
+        // must set TWILIO_PHONE_NUMBER in context as MESSAGING_SID requires it
+        context.TWILIO_PHONE_NUMBER = event.configuration.TWILIO_PHONE_NUMBER;
         const messaging_sid = await getParam(context, 'MESSAGING_SID');
 
         const flow_sid = await deploy_studio_flow(context, env);

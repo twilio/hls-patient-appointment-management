@@ -97,7 +97,7 @@ async function getSimulationParameters() {
   console.log(THIS, "running");
   userActive = true;
 
-  fetch("/deployment/simulate-parameters", {
+  fetch("/simulate-parameters", {
     method: "POST",
     headers: {
       Accept: "application/json",
@@ -130,8 +130,8 @@ async function getSimulationParameters() {
  * @param {*} params - Parameters for the event
  */
 function triggerEvent(params) {
-  console.log(params);
-  return fetch("/deployment/simulation-event", {
+  console.log('parameters:', params);
+  return fetch("/simulate-event", {
     method: "POST",
     headers: {
       Accept: "application/json",

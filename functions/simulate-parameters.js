@@ -1,5 +1,7 @@
 /* eslint-disable prefer-destructuring, dot-notation */
-exports.handler = function (context, event, callback) {
+const twilio = require("twilio");
+exports.handler = async function (context, event, callback) {
+  const { getParam } = require(Runtime.getFunctions()['helpers'].path);
   const path = Runtime.getFunctions()['auth'].path;
   const { isValidAppToken } = require(path);
   const ts = Math.round(new Date().getTime());
@@ -21,13 +23,17 @@ exports.handler = function (context, event, callback) {
   const response = new Twilio.Response();
   response.appendHeader('Content-Type', 'application/json');
 
+  const customer_name = await getParam(context, 'CUSTOMER_NAME');
+  const reply_wait_time = await getParam(context, 'REPLY_WAIT_TIME');
+  const twilio_phone_number = await getParam(context, 'TWILIO_PHONE_NUMBER');
+
   const simulationParameters = {
-    customerName: context.CUSTOMER_NAME,
-    customerPhoneNumber: context.TWILIO_PHONE_NUMBER,
+    customerName: customer_name,
+    customerPhoneNumber: twilio_phone_number,
     appointmentTimestamp: tsTomorrow,
     provider: 'Diaz',
     location: 'Pacific Primary Care',
-    replyWaitTime: context.REPLY_WAIT_TIME,
+    replyWaitTime: reply_wait_time,
   };
   response.setBody(simulationParameters);
   return callback(null, response);

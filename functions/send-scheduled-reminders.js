@@ -1,14 +1,15 @@
 async function sendScheduledReminders(context, event, callback) {
-  console.log(event);
+  const { getParam } = require(Runtime.getFunctions()['helpers'].path);
   const { selectedPatientNumbers } = event;
-  console.log(selectedPatientNumbers)
+  console.log(selectedPatientNumbers);
   const client = context.getTwilioClient();
   const allMessages = await client.messages.list();
   const toSet = new Set();
+  const messaging_sid = await getParam(context, 'MESSAGING_SID')
   const scheduledMessages = allMessages.filter(
     ({ status, messagingServiceSid }) =>
       status === "scheduled" &&
-      messagingServiceSid === context.MESSAGING_SID
+      messagingServiceSid === messaging_sid
   );
   const toSendMessages = [];
   for (const message of scheduledMessages) {

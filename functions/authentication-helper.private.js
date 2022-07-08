@@ -30,7 +30,7 @@ const REFRESH_TOKEN_DURATION = 24 * 60 * 60;
 function isValidPassword(password, context) {
   return (
     checkDisableAuthForLocalhost(context) ||
-    password === context.APPLICATION_PASSWORD
+    (context.APPLICATION_PASSWORD && password === context.APPLICATION_PASSWORD)
   );
 }
 

@@ -7,7 +7,7 @@
 const CONFIGURATION_VARIABLES = [];
 // ---------- UI element css id list used by functions
 const UI = {
-  configure_error_login: '..configure-error-login',
+  configure_error_login: '.configure-error-login',
   deployable_loader: '.deployable-loader',
   account_name: '#account_name',
   app_deployer: '#app-deployer',
@@ -146,7 +146,7 @@ async function populate() {
       },
     });
     const configuration = await response.json();
-    // console.log(THIS, configuration);
+    console.log(THIS, configuration);
 
     $(UI.account_name).val(configuration.twilioAccountName);
 
@@ -171,8 +171,8 @@ async function populate() {
 
   } catch (err) {
     console.log(err);
-    $(UI.configure_error_login).text("Your Twilio authentication failed. Please try again with correct credentials");
-    $(UI.configure_error_login).show();
+    $(".configure-error-login").text("Your Twilio authentication failed. Please try again with correct credentials");
+    $(".configure-error-login").show();
   }
 }
 

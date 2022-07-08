@@ -48,9 +48,11 @@ exports.handler = async function (context, event, callback) {
     validateAppointment(context, appointment);
     appointment.event_type = 'BOOKED'; // over-ride
 
-    // Now we check if the reminder times are 
-    const firstReminderTime = getSendAtDate(context.REMINDER_FIRST_TIMING, appointment.appointment_datetime);
-    const secondReminderTime = getSendAtDate(context.REMINDER_SECOND_TIMING, appointment.appointment_datetime);
+    // Now we check if the reminder times are
+    const reminder_first_timing = await getParam(context, 'REMINDER_FIRST_TIMING');
+    const reminder_second_timing = await getParam(context, 'REMINDER_SECOND_TIMING');
+    const firstReminderTime = getSendAtDate(reminder_first_timing, appointment.appointment_datetime);
+    const secondReminderTime = getSendAtDate(reminder_second_timing, appointment.appointment_datetime);
 
     if (!isValidReminderTime(firstReminderTime) || !isValidReminderTime(secondReminderTime)) {
       response.setBody({ 
@@ -61,9 +63,10 @@ exports.handler = async function (context, event, callback) {
     }
 
     // Now send out 2 scheduled messages
+    const messaging_sid = await getParam(context, 'MESSAGING_SID');
     await client.messages
       .create({
-        messagingServiceSid: context.MESSAGING_SID,
+        messagingServiceSid: messaging_sid,
         body: getReminderMessageBody(appointment),
         sendAt: firstReminderTime,
         scheduleType: 'fixed',
@@ -73,7 +76,7 @@ exports.handler = async function (context, event, callback) {
 
     await client.messages
       .create({
-          messagingServiceSid: context.MESSAGING_SID,
+          messagingServiceSid: messaging_sid,
           body: getReminderMessageBody(appointment),
           sendAt: secondReminderTime,
           scheduleType: 'fixed',

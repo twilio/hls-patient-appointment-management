@@ -1,4 +1,5 @@
 async function checkScheduledReminders(context, event, callback) {
+  const { getParam } = require(Runtime.getFunctions()['helpers'].path);
   const client = context.getTwilioClient();
   const allMessages = await client.messages.list();
   const messaging_sid = await getParam(context , 'MESSAGING_SID');

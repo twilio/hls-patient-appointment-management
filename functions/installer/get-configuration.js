@@ -23,7 +23,7 @@ exports.handler = async function (context, event, callback) {
   const THIS = 'get-configuration:';
 
   const assert = require("assert");
-  const { getParam, retrieveCandidateTwilioPhones } = require(Runtime.getFunctions()['helpers'].path);
+  const { getParam } = require(Runtime.getFunctions()['helpers'].path);
 
   assert(context.DOMAIN_NAME.startsWith('localhost:'), `Can only run on localhost!!!`);
   assert(context.ACCOUNT_SID, 'ACCOUNT_SID not set!!!');
@@ -43,7 +43,7 @@ exports.handler = async function (context, event, callback) {
 
     // ---------- available twilio phone numbers
     {
-      const phoneList = await retrieveCandidateTwilioPhones(context);
+      const phoneList = await retrieve_candidate_phones(context);
       console.log(THIS, `retrieved ${phoneList.length} twilio phone numbers`);
       response.twilioPhoneNumbers = phoneList;
     }
@@ -126,124 +126,50 @@ async function read_configuration_variables() {
 }
 
 
+/*
+ * --------------------------------------------------------------------------------
+ * returns candidate Twilio phone numbers assignable to this application.
+ *
+ * TODO: please customize (e.g., sms capable) to reflect application-specific phone number requirement
+ *
+ * returns: array of { phondSID, phoneNumber, friendlyName }
+ * --------------------------------------------------------------------------------
+ */
+async function retrieve_candidate_phones(context) {
+  const { getParam } = require(Runtime.getFunctions()['helpers'].path);
 
+  const client = context.getTwilioClient();
 
-// const { getParam } = require(Runtime.getFunctions()['helpers'].path);
-// const configure_env = require("configure-env");
-// const path = require('path');
-// const fs = require('fs');
-// const assert = require("assert");
-//
-// exports.handler = async function (context, event, callback) {
-//   const THIS = 'get-account:';
-//   console.time(THIS);
-//   const client = context.getTwilioClient();
-//   const response = new Twilio.Response();
-//   response.setStatusCode(200);
-//
-//   try {
-//     const variables = await readConfigurationVariables();
-//     const account = await client.api.accounts(context.ACCOUNT_SID).fetch();
-//     const accountInfo = {
-//       friendlyName: account.friendlyName,
-//       accountSid: account.sid,
-//       status: account.status
-//     }
-//
-//     const phoneList = await client.api.accounts(context.ACCOUNT_SID).incomingPhoneNumbers.list();
-//     const twilioFlowId = await getParam(context, 'FLOW_SID');
-//
-//
-//     // Check in sms url whether deployed studio flow id is present or not. Then take that phone number else check for numbers where phone.capabilites.sms === true and phone.smsUrl is empty.
-//     let phoneNumbers = phoneList.filter((phone) => phone.smsUrl.includes(twilioFlowId));
-//
-//     if(!phoneNumbers.length) {
-//       phoneNumbers = phoneList.filter((phone) => phone.capabilities.sms && !phone.smsUrl);
-//     }
-//
-//     // If there is no phone numbers with sms capabilities, create a new one with sms capability.
-//     if(!phoneNumbers.length) {
-//       phoneNumbers = await createTwilioPhoneNumber(context, variables)
-//     }
-//
-//     if(!phoneNumbers.length) {
-//       throw new Error("Unable to get phone number");
-//     }
-//
-//     const phones = phoneNumbers.map(phone => {
-//       return {
-//         friendlyName: phone.friendlyName,
-//         phoneNumber: phone.phoneNumber,
-//         phoneSid: phone.sid
-//       }
-//     });
-//
-//     const applicationName = await getParam(context, 'APPLICATION_NAME');
-//     const messagingService = await client.messaging.services.list().then(services => services.find(
-//       service => service.friendlyName === applicationName
-//     ));
-//
-//     response.setBody({
-//       account: accountInfo,
-//       phoneList: phones,
-//       messagingServiceSid: (messagingService && messagingService.sid) ? messagingService.sid : 'NOT-DEPLOYED',
-//       configuration: variables,
-//     });
-//     return callback(null, response);
-//   } catch (err) {
-//     console.log(THIS, err);
-//     response.setStatusCode(400);
-//     response.setBody({message: THIS + " There was an error getting your account information."});
-//     return callback(err, response);
-//   } finally {
-//     console.timeEnd(THIS);
-//   }
-// }
-//
-// async function readConfigurationVariables() {
-//   const path_env = path.join(process.cwd(), '.env');
-//   const payload = fs.readFileSync(path_env, 'utf8');
-//   const configuration = configure_env.parser.parse(payload)
-//   return configuration.variables;
-// }
-//
-//
-// /**
-//  * Create a new phone number and returns it
-//  * @param {*} context
-//  * @returns
-//  */
-//
-//  async function createTwilioPhoneNumber (context, configuration) {
-//   const client = context.getTwilioClient();
-//
-//   // If country code not present default to US
-//   const countryCode = configuration.find(o => o.key === 'COUNTRY_CODE')?.default || 'US';
-//   console.log("Buying a new number....", countryCode);
-//
-//   try {
-//     const phoneNumbers = await client
-//       .availablePhoneNumbers(countryCode)
-//       .local.list({ limit: 1 });
-//
-//     console.log("Available numbers....", phoneNumbers);
-//
-//     if (!phoneNumbers.length) {
-//       return [];
-//     }
-//
-//     const { phoneNumber } = phoneNumbers[0];
-//
-//     console.log("Selected number...", phoneNumber);
-//
-//     const createdPhoneNumber = await client.incomingPhoneNumbers.create({
-//       phoneNumber,
-//       capabilities: {
-//         sms: true,
-//       },
-//     });
-//     return [createdPhoneNumber];
-//   } catch {
-//     return [];
-//   }
-// };
+  const phonesAll = await client.incomingPhoneNumbers.list();
+
+  // TODO: filter for application-specific capabilities
+  const phonesCandidate = phonesAll.filter(p => p.capabilities.sms);
+
+  // TODO: sort in application-specific order
+  const flow_sid = await getParam(context, 'FLOW_SID');
+  phonesCandidate.sort(function compareFn(a, b) {
+    const phoneNaturalOrder = a.phoneNumber === b.phoneNumber
+      ? 0
+      : (a.phoneNumber > b.phoneNumber ? -1 : 1);
+
+    if (a.smsUrl && b.smsUrl) {
+      if (a.smsUrl.includes(flow_sid) && b.smsUrl.includes(flow_sid)) return phoneNaturalOrder;
+      else if (a.smsUrl.includes(flow_sid) && ! b.smsUrl.includes(flow_sid)) return -1;
+      else if (! a.smsUrl.includes(flow_sid) && b.smsUrl.includes(flow_sid)) return 1;
+    } else if (a.smsUrl && ! b.smsUrl) {
+      return 1;
+    } else if (! a.smsUrl && b.smsUrl) {
+      return -1;
+    } else {
+      return phoneNaturalOrder;
+    }
+  });
+
+  const response = phonesCandidate.map(p => {
+    return {
+      phoneNumber: p.phoneNumber,
+      friendlyName: p.friendlyName,
+    }
+  });
+  return response;
+}

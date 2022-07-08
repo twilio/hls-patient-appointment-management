@@ -18,8 +18,8 @@ endif
 
 
 # ---------- variables
-APPLICATION_NAME := $(shell basename `pwd`)
-SERVICE_UNAME    := 'patient-appointment-management'
+APPLICATION_NAME := $(shell jq .name package.json)
+SERVICE_UNAME    := $(APPLICATION_NAME)
 VERIFY_FNAME     := $(APPLICATION_NAME)
 VERSION          := $(shell jq --raw-output .version package.json)
 INSTALLER_NAME   := hls-pam-installer

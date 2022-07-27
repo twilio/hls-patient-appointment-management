@@ -11,24 +11,30 @@
  * }
  * --------------------------------------------------------------------------------
  */
-const assert = require("assert");
+const path = require("path");
+const fs = require("fs");
 exports.handler = async function (context, event, callback) {
   const THIS = 'check:';
 
   const assert = require("assert");
-  const { getParam } = require(Runtime.getFunctions()['helpers'].path);
+  const { getParam, fetchVersionToDeploy } = require(Runtime.getFunctions()['helpers'].path);
 
   assert(context.DOMAIN_NAME.startsWith('localhost:'), `Can only run on localhost!!!`);
   console.time(THIS);
   try {
 
     // ---------- check service ----------------------------------------
-    const service_sid        = await getParam(context, 'SERVICE_SID');
-    const flow_sid           = await getParam(context, 'FLOW_SID');
-    const environment_domain = service_sid ? await getParam(context, 'ENVIRONMENT_DOMAIN_NAME') : null;
+    const service_sid         = await getParam(context, 'SERVICE_SID');
+    const application_version = await getParam(context, 'APPLICATION_VERSION');
+    const flow_sid            = await getParam(context, 'FLOW_SID');
+    const environment_domain  = service_sid ? await getParam(context, 'ENVIRONMENT_DOMAIN_NAME') : null;
 
     const response = {
       deploy_state: (service_sid && flow_sid) ? 'DEPLOYED' : 'NOT-DEPLOYED',
+      version: {
+        deployed : application_version,
+        to_deploy: await fetchVersionToDeploy(),
+      },
       service_sid: service_sid,
       flow_sid: flow_sid,
       application_url: service_sid ? `https:/${environment_domain}/index.html` : null,

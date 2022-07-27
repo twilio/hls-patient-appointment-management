@@ -1,8 +1,13 @@
-# Appointment Management with EHR Integration App: Technical Guide
+# Appointment Management with EHR Integration
 
 *This document is intended to serve as a technical guide for customers who are interested in the architecture of the Appointment Management with EHR Integration application, and for understanding installation and customization possibilities.*
 
 *Installation of this application is supported using the latest versions of Chrome and Firefox. Installation via Internet Explorer has not been officially tested and although issues are not expected, unforeseen problems may occur.*
+
+- [Application Overview](#application-overview)
+- [Architecture Highlights](#architecture-highlights)
+- [Architecture Details](#architecture-details)
+- [Installation](#installationxw)
 
 ---
 
@@ -114,7 +119,7 @@ This application uses multi-factor authentication using JSON Web Tokens and a si
 
 ---
 
-## Installation Information
+## Installation
 
 This section details the requirements for a successful deployment and installation of the prototype application, including the necessary prerequisite steps, the variables that are needed to initiate installation, and the installation steps themselves.
 
@@ -151,23 +156,24 @@ that is listening on port `3000`
 such as development servers or another HLS installer still running.
 
 
-#### Build Installer Docker Image
+#### Remove Docker Image
+
+First, to ensure installation using the latest docker image, execute the following in your terminal window
 
 ```shell
-docker build --tag pam-installer --no-cache https://github.com/twilio/hls-patient-appointment-management.git#main
+docker image rm twiliohls/hls-pam-installer
 ```
-
-If running on Apple Silicon (M1 chip), add `--platform linux/amd64` option.
 
 
 #### Run Installer Docker Container
 
-Replace `${TWILIO_ACCOUNT_SID}` and `${TWILIO_AUTH_TOKEN}` with that of your target Twilio account.
+Replace `${TWILIO_ACCOUNT_SID}` and `${TWILIO_AUTH_TOKEN}` with that of your target Twilio account
+and execute the following in your terminal window.
 
 ```shell
-docker run --name pam-installer --rm --publish 3000:3000  \
+docker run --name twiliohls/hls-pam-installer --rm --publish 3000:3000  \
 --env ACCOUNT_SID=${TWILIO_ACCOUNT_SID} --env AUTH_TOKEN=${TWILIO_AUTH_TOKEN} \
---interactive --tty pam-installer
+--interactive --tty twiliohls/hls-pam-installer
 ```
 
 If running on Apple Silicon (M1 chip), add `--platform linux/amd64` option.
@@ -187,4 +193,4 @@ and wait until installer indicates completion.
 
 To terminate installer:
 - Enter Control-C in the terminal where `docker run ...` was executed
-- Stop the `hls-outreach-installer` docker container via the Docker Desktop
+- Stop the `hls-pam-installer` docker container via the Docker Desktop

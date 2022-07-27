@@ -8,12 +8,11 @@
  * event.action: CREATE|UPDATE|DELETE, defaults to CREATE|UPDATE depending on deployed state
  * --------------------------------------------------------------------------------
  */
-const assert = require("assert");
 exports.handler = async function(context, event, callback) {
   const THIS = 'deploy:';
 
   const assert = require("assert");
-  const { getParam } = require(Runtime.getFunctions()['helpers'].path);
+  const { getParam, setParam, fetchVersionToDeploy } = require(Runtime.getFunctions()['helpers'].path);
 
   assert(context.DOMAIN_NAME.startsWith('localhost:'), `Can only run on localhost!!!`);
   console.time(THIS);
@@ -46,7 +45,9 @@ exports.handler = async function(context, event, callback) {
         const flow_sid = await deploy_studio_flow(context, env);
         console.log(THIS, `deployed studio flow: ${flow_sid}`);
 
-        console.log(THIS, `Completed deployment of ${application_name}`);
+        const version_to_deploy = await fetchVersionToDeploy();
+        await setParam(context, 'APPLICATION_VERSION', version_to_deploy);
+        console.log(THIS, `Completed deployment of ${application_name}:${version_to_deploy}`);
 
         const response = {
           status: event.action,
@@ -113,6 +114,7 @@ exports.handler = async function(context, event, callback) {
  * --------------------------------------------------------------------------------
  */
 async function deploy_service(context, envrionmentVariables = {}) {
+  const assert = require("assert");
   const { getParam } = require(Runtime.getFunctions()['helpers'].path);
   const { getListOfFunctionsAndAssets } = require('@twilio-labs/serverless-api/dist/utils/fs');
   const { TwilioServerlessApiClient } = require('@twilio-labs/serverless-api');
@@ -182,6 +184,7 @@ async function deploy_service(context, envrionmentVariables = {}) {
  * --------------------------------------------------------------------------------
  */
 async function undeploy_service(context) {
+  const assert = require("assert");
   const { getParam } = require(Runtime.getFunctions()['helpers'].path);
 
   const client = context.getTwilioClient();
@@ -200,6 +203,7 @@ async function undeploy_service(context) {
  * --------------------------------------------------------------------------------
  */
 async function deploy_studio_flow(context, envrionmentVariables) {
+  const assert = require("assert");
   const fs = require('fs');
   const { getParam } = require(Runtime.getFunctions()['helpers'].path);
 
@@ -277,12 +281,12 @@ async function deploy_studio_flow(context, envrionmentVariables) {
 }
 
 
-
 /* --------------------------------------------------------------------------------
  * undeploys studio flow & unset smsURL webhook for twilio phone number
  * --------------------------------------------------------------------------------
  */
 async function undeploy_studio_flow(context) {
+  const assert = require("assert");
   const { getParam } = require(Runtime.getFunctions()['helpers'].path);
 
   const client = context.getTwilioClient();
@@ -294,128 +298,3 @@ async function undeploy_studio_flow(context) {
 
   return flow_sid;
 }
-
-
-
-
-
-
-
-
-async function getPhoneNumberToAddSid(client) {
-return await client.incomingPhoneNumbers
-    .list()
-    .then(incomingPhoneNumbers => incomingPhoneNumbers[0].sid);
-}
-
-async function deployStudioFlow(context, event, callback) {
-    console.log(THIS, 'Starting');
-    console.time(THIS);
-    try {
-
-       let flow = null;
-
-        switch (action) {
-        case 'UPDATE':
-            {
-            console.log(THIS, 'Updating flow FLOW_SID=', FLOW_SID);
-            flow = await client.studio.flows(FLOW_SID).update({
-                friendlyName: APPLICATION_NAME,
-                status: 'published',
-                commitMessage: 'Manually triggered update',
-                definition: `${flow_definition}`,
-            });
-
-            console.log(THIS, 'TWILIO_PHONE_NUMBER=', TWILIO_PHONE_NUMBER);
-            const phoneNumberSid = await getPhoneNumberSid(TWILIO_PHONE_NUMBER);
-            console.log(THIS, 'TWILIO_PHONE_NUMBER_SID=', phoneNumberSid);
-            await updatePhoneNumberWebhook(flow.webhookUrl, phoneNumberSid);
-            console.log(THIS, 'TWILIO_PHONE_NUMBER assigned to flow');
-            }
-            break;
-
-        case 'CREATE':
-            {
-            console.log(THIS, 'Creating flow');
-            flow = await client.studio.flows.create({
-                friendlyName: APPLICATION_NAME,
-                status: 'published',
-                commitMessage: 'Code Exchange automatic deploy',
-                definition: `${flow_definition}`,
-            });
-            setParam(context, 'FLOW_SID', flow.sid);
-
-            console.log(THIS, 'TWILIO_PHONE_NUMBER=', TWILIO_PHONE_NUMBER);
-            const phoneNumberSid = await getPhoneNumberSid(TWILIO_PHONE_NUMBER);
-            console.log(THIS, 'TWILIO_PHONE_NUMBER_SID=', phoneNumberSid);
-            await updatePhoneNumberWebhook(flow.webhookUrl, phoneNumberSid);
-            console.log(THIS, 'TWILIO_PHONE_NUMBER assigned to flow');
-            }
-            break;
-
-        case 'DELETE':
-            console.log(THIS, 'Deleting FLOW_SID=', FLOW_SID);
-            await client.studio.flows(FLOW_SID).remove();
-            break;
-
-        default:
-            return callback('undefined action!');
-        }
-        return callback(null, {
-            status: `${action} success`,
-            flowId: flow.sid,
-            flowUrl: flow.url
-        });
-    } catch (err) {
-        console.log(err);
-        return callback(err);
-    } finally {
-        console.timeEnd(THIS);
-    }
-};
-
-async function deployMessagingService(context, event, callback) {
-  const response = new Twilio.Response();
-  const client = context.getTwilioClient();
-  response.appendHeader('Content-Type', 'application/json');
-  response.appendHeader('Access-Control-Allow-Origin', '*');
-  response.appendHeader('Access-Control-Allow-Methods', 'OPTIONS, POST, GET');
-  response.appendHeader('Access-Control-Allow-Headers', 'Content-Type');
-  response.setStatusCode(200);
-
-  try {
-    const appName = await getParam(context, 'APPLICATION_NAME');
-    const pamMessageService = await client.messaging.services
-      .list()
-      .then(services => services.find(service => service.friendlyName === appName));
-    if (event.action === 'CREATE') {
-      if (pamMessageService) {
-        await client.messaging.services(pamMessageService.sid).remove();
-      }
-      const service = await client.messaging.services.create({friendlyName: (await getParam(context, 'APPLICATION_NAME'))});
-      const phoneSid = await getPhoneNumberToAddSid(client);
-      await client.messaging.services(service.sid).phoneNumbers
-        .create({phoneNumberSid: phoneSid})
-        .then(phoneNumber => console.log("Added phoneSid, " + phoneNumber.sid +  ", to messaging service " + service.sid));
-      console.log("Setting MESSAGING_SID", service.sid);
-      await setParam(context, 'MESSAGING_SID', service.sid);
-      response.setBody({message: service});
-    } else if (event.action === 'DELETE') {
-      if (!pamMessageService) {
-        response.setStatusCode(400);
-        return callback("Error: Could not find messaging service with the name, " + await getParam(context, 'APPLICATION_NAME'));
-      }
-      await client.messaging.services(pamMessageService.sid).remove();
-    } else {
-      response.setStatusCode(400);
-      return callback("Error: action was not provided");
-    }
-
-    response.setStatusCode(200);
-    return callback(null, response);
-  } catch (err) {
-    response.setStatusCode(400);
-    return callback(err, response);
-  }
-};
-

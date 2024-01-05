@@ -3,7 +3,7 @@
   "version": "2.0.1",
   "private": true,
   "dependencies": {
-    "twilio": "3.77.2",
+    "twilio": "4.19.3",
     "@twilio-labs/serverless-api": "5.4.2",
     "@twilio/runtime-handler": "1.2.3",
     "configure-env": "2.0.0-1",
